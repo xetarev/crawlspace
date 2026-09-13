@@ -1,5 +1,5 @@
 feedparser
 trafilatura
-google-generativeai
+google-genai
 httpx
 python-slugify

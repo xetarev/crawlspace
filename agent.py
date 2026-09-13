@@ -22,7 +22,8 @@ import re
 import httpx
 import feedparser
 import trafilatura
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from slugify import slugify
 from datetime import datetime, timezone
 
@@ -54,7 +55,13 @@ RSS_FEEDS = [
 ARTICLES_PER_RUN   = 3    # how many new posts to create per GitHub Actions run
 STATE_FILE         = "seen_articles.json"
 MIN_SUMMARY_LENGTH = 80   # chars — below this we try trafilatura for full text
-GEMINI_MODEL       = "gemini-2.0-flash-lite"  # 30 RPM / 1500 RPD free tier
+MODEL_CHAIN = [
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-3.5-flash",
+    "gemini-3.6-flash",
+    "gemini-3.7-flash",
+]
 
 # ─── Xetarev brand context injected into every Gemini prompt ────────────────
 BRAND_CONTEXT = """
@@ -193,14 +200,29 @@ def find_image_url(query: str) -> str:
 
 # ─── Gemini content generation ────────────────────────────────────────────────
 
+def _is_model_not_found(exc: Exception) -> bool:
+    """True when the error indicates the model ID is missing / unavailable (try next)."""
+    msg = str(exc).lower()
+    if "404" in msg or "not found" in msg or "is not found" in msg:
+        return True
+    # google.genai / google.api_core often surface NotFound with these codes
+    code = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+    if code in (404, "404", "NOT_FOUND"):
+        return True
+    status = getattr(exc, "status", None)
+    if status in (404, "NOT_FOUND"):
+        return True
+    return False
+
+
 def generate_post(article: dict, body_text: str) -> dict | None:
     """
     Call Gemini to produce a structured JSON response with all post fields.
+    Tries each model in MODEL_CHAIN until one succeeds.
     Returns a dict with: title, slug, excerpt, paragraphs (list of strings), keywords (list)
     Returns None if generation fails.
     """
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel(GEMINI_MODEL)
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     prompt = f"""
 {BRAND_CONTEXT}
@@ -238,22 +260,35 @@ Respond ONLY with valid JSON, no markdown fences, no extra text. Format:
 }}
 """
 
-    try:
-        response = model.generate_content(prompt)
-        raw = response.text.strip()
-        # Strip markdown code fences if Gemini adds them despite instructions
-        raw = re.sub(r"^```json\s*", "", raw)
-        raw = re.sub(r"^```\s*", "", raw)
-        raw = re.sub(r"\s*```$", "", raw)
-        data = json.loads(raw)
-        log.info(f"Gemini generated post: {data.get('title', '')[:60]}")
-        return data
-    except json.JSONDecodeError as e:
-        log.error(f"Gemini returned invalid JSON: {e}\nRaw response: {raw[:300]}")
-        return None
-    except Exception as e:
-        log.error(f"Gemini call failed: {e}")
-        return None
+    last_error = None
+    for model_name in MODEL_CHAIN:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(max_output_tokens=1000),
+            )
+            raw = response.text.strip()
+            # Strip markdown code fences if Gemini adds them despite instructions
+            raw = re.sub(r"^```json\s*", "", raw)
+            raw = re.sub(r"^```\s*", "", raw)
+            raw = re.sub(r"\s*```$", "", raw)
+            data = json.loads(raw)
+            log.info(f"Gemini ({model_name}) generated post: {data.get('title', '')[:60]}")
+            return data
+        except json.JSONDecodeError as e:
+            log.error(f"Gemini ({model_name}) returned invalid JSON: {e}\nRaw response: {raw[:300]}")
+            return None
+        except Exception as e:
+            last_error = e
+            if _is_model_not_found(e):
+                log.warning(f"Model {model_name} not found (404), trying next: {e}")
+                continue
+            log.error(f"Gemini call failed with {model_name}: {e}")
+            return None
+
+    log.error(f"All models in MODEL_CHAIN failed. Last error: {last_error}")
+    return None
 
 
 # ─── Lexical JSON builder ─────────────────────────────────────────────────────
