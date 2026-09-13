@@ -604,6 +604,7 @@ def post_to_payload(generated: dict, content_json: dict, featured_image_url: str
             "title":       generated["title"],
             "description": generated.get("excerpt", ""),
         },
+        "category": "aif",
         "publishedAt":   now_iso,
         "_status":       "published",
     }
