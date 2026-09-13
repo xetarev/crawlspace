@@ -176,26 +176,45 @@ def get_article_text(article: dict) -> str:
 
 # ─── Image search ─────────────────────────────────────────────────────────────
 
-def find_image_url(query: str) -> str:
+def find_image_url(query: str, start: int = 0) -> str:
     """
-    Fetch a relevant image URL from Unsplash Source (no API key needed).
-    Returns a direct image URL or a reliable fallback.
+    Search DuckDuckGo Images for a relevant image URL.
+    start=0 returns the first result, start=1 returns the second, etc.
+    Falls back to Picsum if search fails.
     """
-    # Unsplash Source gives a redirect to a real photo by keyword — free, no key
-    # We follow the redirect to get the actual stable image URL
-    keywords = query.replace(" ", ",")[:60]
-    source_url = f"https://source.unsplash.com/1200x630/?{keywords}"
     try:
-        r = httpx.get(source_url, follow_redirects=True, timeout=10)
-        if r.status_code == 200 and "image" in r.headers.get("content-type", ""):
-            final_url = str(r.url)
-            log.info(f"Image found: {final_url[:80]}")
-            return final_url
-    except Exception as e:
-        log.warning(f"Unsplash image fetch failed: {e}")
+        # DuckDuckGo image search vqd token
+        search_url = "https://duckduckgo.com/"
+        r = httpx.get(search_url, params={"q": query}, timeout=10, headers={
+            "User-Agent": "Mozilla/5.0 (compatible; Xetarev-Agent/1.0)"
+        })
+        vqd = re.search(r'vqd=([\d-]+)', r.text)
+        if not vqd:
+            raise ValueError("Could not extract vqd token")
 
-    # Fallback: a neutral tech-themed image from Unsplash's static CDN
-    return "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80"
+        img_url = "https://duckduckgo.com/i.js"
+        r2 = httpx.get(img_url, params={
+            "q": query,
+            "vqd": vqd.group(1),
+            "f": ",,,,,",
+            "p": "1",
+        }, timeout=10, headers={
+            "User-Agent": "Mozilla/5.0 (compatible; Xetarev-Agent/1.0)",
+            "Referer": "https://duckduckgo.com/",
+        })
+        results = r2.json().get("results", [])
+        if results and len(results) > start:
+            image = results[start].get("image", "")
+            if image:
+                log.info(f"DDG image found (slot {start}): {image[:80]}")
+                return image
+    except Exception as e:
+        log.warning(f"DDG image search failed: {e}")
+
+    # Fallback
+    import hashlib
+    seed_int = int(hashlib.md5(query.encode()).hexdigest(), 16) % 1000
+    return f"https://picsum.photos/seed/{seed_int}/1200/630"
 
 
 # ─── Gemini content generation ────────────────────────────────────────────────
@@ -499,9 +518,8 @@ def main():
         # 3. Find images — one for featured, one for inline body
         # Use the post title/keywords as the search query
         image_query = " ".join(generated.get("keywords", [])[:3]) or article["title"][:40]
-        featured_image_url = find_image_url(image_query)
-        time.sleep(1)  # small pause between Unsplash calls
-        inline_image_url = find_image_url(image_query + " technology")
+        featured_image_url = find_image_url(image_query, start=0)
+        inline_image_url = find_image_url(image_query, start=1)
 
         # 4. Build Lexical content JSON
         content_json = build_lexical_content(
