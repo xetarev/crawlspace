@@ -300,11 +300,25 @@ def get_article_text(article: dict) -> str:
 
 # ─── Image search ─────────────────────────────────────────────────────────────
 
-def find_image_url(query: str, start: int = 0) -> str:
+def is_image_accessible(url: str) -> bool:
+    """Return True if a HEAD request to url returns status 200."""
+    try:
+        r = httpx.head(
+            url,
+            timeout=5,
+            follow_redirects=True,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; Xetarev-Agent/1.0)"},
+        )
+        return r.status_code == 200
+    except Exception:
+        return False
+
+
+def find_image_url(query: str) -> str:
     """
     Search DuckDuckGo Images for a relevant image URL.
-    start=0 returns the first result, start=1 returns the second, etc.
-    Falls back to Picsum if search fails.
+    Tries each result until one is accessible via HEAD.
+    Falls back to Picsum if search fails or none are accessible.
     """
     try:
         # DuckDuckGo image search vqd token
@@ -327,10 +341,10 @@ def find_image_url(query: str, start: int = 0) -> str:
             "Referer": "https://duckduckgo.com/",
         })
         results = r2.json().get("results", [])
-        if results and len(results) > start:
-            image = results[start].get("image", "")
-            if image:
-                log.info(f"DDG image found (slot {start}): {image[:80]}")
+        for result in results:
+            image = result.get("image", "")
+            if image and is_image_accessible(image):
+                log.info(f"DDG image found (accessible): {image[:80]}")
                 return image
     except Exception as e:
         log.warning(f"DDG image search failed: {e}")
@@ -654,8 +668,8 @@ def main():
         # 3. Find images — one for featured, one for inline body
         # Use the post title/keywords as the search query
         image_query = " ".join(generated.get("keywords", [])[:3]) or article["title"][:40]
-        featured_image_url = find_image_url(image_query, start=0)
-        inline_image_url = find_image_url(image_query, start=1)
+        featured_image_url = find_image_url(image_query)
+        inline_image_url = find_image_url(image_query)
 
         # 4. Build Lexical content JSON
         content_json = build_lexical_content(
