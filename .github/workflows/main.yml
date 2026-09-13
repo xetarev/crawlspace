@@ -34,13 +34,17 @@ jobs:
           GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
           PAYLOAD_API_URL:   ${{ secrets.PAYLOAD_API_URL }}
           PAYLOAD_API_TOKEN: ${{ secrets.PAYLOAD_API_TOKEN }}
+          PAYLOAD_EMAIL:    ${{ secrets.PAYLOAD_EMAIL }}
+          PAYLOAD_PASSWORD: ${{ secrets.PAYLOAD_PASSWORD }}
         run: python agent.py
 
       - name: Commit updated seen_articles.json
         run: |
           git config user.name "xetarev-agent[bot]"
           git config user.email "xetarev-agent[bot]@users.noreply.github.com"
-          git pull --rebase origin main
           git add seen_articles.json
+          git stash
+          git pull --rebase origin main
+          git stash pop
           git diff --cached --quiet || git commit -m "chore: update seen articles [skip ci]"
           git push

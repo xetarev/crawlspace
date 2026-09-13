@@ -392,7 +392,26 @@ def build_lexical_content(paragraphs: list[str], image_url: str, image_alt: str)
 
 # ─── Payload REST API POST ────────────────────────────────────────────────────
 
-def post_to_payload(generated: dict, content_json: dict, featured_image_url: str) -> bool:
+def get_payload_jwt() -> str | None:
+    """Log in to Payload and return a short-lived JWT."""
+    login_url = PAYLOAD_API_URL.replace("/api/inlight-posts", "/api/users/login")
+    try:
+        r = httpx.post(login_url, json={
+            "email": os.environ["PAYLOAD_EMAIL"],
+            "password": os.environ["PAYLOAD_PASSWORD"],
+        }, timeout=10)
+        if r.status_code == 200:
+            token = r.json().get("token")
+            log.info("Payload JWT obtained")
+            return token
+        log.error(f"Payload login failed {r.status_code}: {r.text[:200]}")
+        return None
+    except Exception as e:
+        log.error(f"Payload login error: {e}")
+        return None
+
+
+def post_to_payload(generated: dict, content_json: dict, featured_image_url: str, jwt: str) -> bool:
     """
     POST the generated post to Payload CMS as a published document.
     Field names match exactly what's in your inlight_posts table.
@@ -421,7 +440,7 @@ def post_to_payload(generated: dict, content_json: dict, featured_image_url: str
     }
 
     headers = {
-        "Authorization": f"Bearer {PAYLOAD_API_TOKEN}",
+        "Authorization": f"JWT {jwt}",
         "Content-Type":  "application/json",
     }
 
@@ -444,6 +463,11 @@ def post_to_payload(generated: dict, content_json: dict, featured_image_url: str
 
 def main():
     log.info("=== Xetarev SEO News Agent starting ===")
+
+    jwt = get_payload_jwt()
+    if not jwt:
+        log.error("Could not obtain Payload JWT. Exiting.")
+        return
 
     seen = load_seen()
     log.info(f"Loaded {len(seen)} previously seen article IDs")
@@ -487,7 +511,7 @@ def main():
         )
 
         # 5. POST to Payload
-        success = post_to_payload(generated, content_json, featured_image_url)
+        success = post_to_payload(generated, content_json, featured_image_url, jwt)
 
         # 6. Mark as seen regardless of publish success
         # (so a broken post doesn't retry and spam your CMS)
