@@ -314,12 +314,14 @@ def is_image_accessible(url: str) -> bool:
         return False
 
 
-def find_image_url(query: str) -> str:
+def find_image_url(query: str, exclude_urls: set[str] | None = None) -> str:
     """
     Search DuckDuckGo Images for a relevant image URL.
     Tries each result until one is accessible via HEAD.
+    Skips any URL in exclude_urls (e.g. already chosen as featured).
     Falls back to Picsum if search fails or none are accessible.
     """
+    exclude = exclude_urls or set()
     try:
         # DuckDuckGo image search vqd token
         search_url = "https://duckduckgo.com/"
@@ -343,16 +345,23 @@ def find_image_url(query: str) -> str:
         results = r2.json().get("results", [])
         for result in results:
             image = result.get("image", "")
-            if image and is_image_accessible(image):
+            if not image or image in exclude:
+                continue
+            if is_image_accessible(image):
                 log.info(f"DDG image found (accessible): {image[:80]}")
                 return image
     except Exception as e:
         log.warning(f"DDG image search failed: {e}")
 
-    # Fallback
-    import hashlib
+    # Fallback — offset seed when excluding so featured/inline stay distinct
     seed_int = int(hashlib.md5(query.encode()).hexdigest(), 16) % 1000
-    return f"https://picsum.photos/seed/{seed_int}/1200/630"
+    if exclude:
+        seed_int = (seed_int + 1) % 1000
+    fallback = f"https://picsum.photos/seed/{seed_int}/1200/630"
+    if fallback in exclude:
+        seed_int = (seed_int + 1) % 1000
+        fallback = f"https://picsum.photos/seed/{seed_int}/1200/630"
+    return fallback
 
 
 # ─── Gemini content generation ────────────────────────────────────────────────
@@ -604,7 +613,7 @@ def post_to_payload(generated: dict, content_json: dict, featured_image_url: str
             "title":       generated["title"],
             "description": generated.get("excerpt", ""),
         },
-        "category": "aif",
+        "categories": [5],
         "publishedAt":   now_iso,
         "_status":       "published",
     }
@@ -666,11 +675,11 @@ def main():
             seen.add(article["id"])
             continue
 
-        # 3. Find images — one for featured, one for inline body
+        # 3. Find images — one for featured, one for inline body (must be distinct)
         # Use the post title/keywords as the search query
         image_query = " ".join(generated.get("keywords", [])[:3]) or article["title"][:40]
         featured_image_url = find_image_url(image_query)
-        inline_image_url = find_image_url(image_query)
+        inline_image_url = find_image_url(image_query, exclude_urls={featured_image_url})
 
         # 4. Build Lexical content JSON
         content_json = build_lexical_content(
