@@ -18,6 +18,7 @@ import json
 import time
 import hashlib
 import logging
+import random
 import re
 import httpx
 import feedparser
@@ -42,19 +43,138 @@ PAYLOAD_API_TOKEN = os.environ["PAYLOAD_API_TOKEN"]
 # ─── RSS Feeds to poll ──────────────────────────────────────────────────────
 # Add or remove feeds here. These are all verified active in 2026.
 RSS_FEEDS = [
-    ("TechCrunch",    "https://techcrunch.com/feed/"),
-    ("The Verge",     "https://www.theverge.com/rss/index.xml"),
-    ("Wired",         "https://www.wired.com/feed/rss"),
-    ("Ars Technica",  "https://feeds.arstechnica.com/arstechnica/index"),
-    ("BBC Tech",      "https://feeds.bbci.co.uk/news/technology/rss.xml"),
-    ("BBC World",     "https://feeds.bbci.co.uk/news/world/rss.xml"),
-    ("NPR",           "https://feeds.npr.org/1001/rss.xml"),
+    # Mainstream Tech News & Analysis
+    ("TechCrunch AI",          "https://techcrunch.com/category/artificial-intelligence/feed/"),
+    ("WIRED",                  "https://www.wired.com/feed/rss"),
+    ("The Verge",              "https://www.theverge.com/rss/index.xml"),
+    ("ZDNET",                  "https://www.zdnet.com/news/rss.xml"),
+    ("Computerworld",          "https://www.computerworld.com/feed"),
+    ("InfoWorld",              "https://www.infoworld.com/feed"),
+    ("SiliconANGLE",           "https://siliconangle.com/feed"),
+    ("Gizmodo",                "https://gizmodo.com/rss"),
+    ("The Register",           "https://search.theregister.com/?q=technology&_t=all&feed=1"),
+    
+    # AI & Machine Learning
+    ("Hugging Face",           "https://huggingface.co/blog/feed.xml"),
+    ("Google DeepMind",        "https://deepmind.google/blog/feed"),
+    ("OpenAI News",            "https://openai.com/news/rss.xml"),
+    ("The Decoder",            "https://the-decoder.com/feed"),
+    ("Synced",                 "https://syncedreview.com/feed"),
+    ("KDnuggets",              "https://www.kdnuggets.com/feed"),
+    ("Towards Data Science",   "https://towardsdatascience.com/feed"),
+    ("NVIDIA Developer",       "https://developer.nvidia.com/blog//feed"),
+    ("Unite.AI",               "https://www.unite.ai/feed/"),
+    ("MarkTechPost",           "https://www.marktechpost.com/feed/"),
+
+    # Consumer Tech & Gadget Reviews
+    ("Engadget",               "https://www.engadget.com/rss.xml"),
+    ("CNET",                   "https://www.cnet.com/rss/news/"),
+    ("PCMag",                  "https://www.pcmag.com/feeds/rss/latest"),
+    ("Tom's Hardware",         "https://www.tomshardware.com/feeds.xml"),
+    ("Tom's Guide",            "https://www.tomsguide.com/feeds.xml"),
+    ("TechRadar",              "https://www.techradar.com/feeds.xml"),
+    ("Digital Trends",         "https://www.digitaltrends.com/feed"),
+    ("TechSpot",               "https://www.techspot.com/backend.xml"),
+    ("Trusted Reviews",        "https://www.trustedreviews.com/feed"),
+    ("SlashGear",              "https://www.slashgear.com/feed"),
+
+    # Mobile & Smartphone News
+    ("GSMArena",               "https://www.gsmarena.com/rss-news-reviews.php3"),
+    ("PhoneArena",             "https://www.phonearena.com/feed/news"),
+    ("XDA",                    "https://www.xda-developers.com/feed"),
+    ("Android Authority",      "https://www.androidauthority.com/feed"),
+    ("Android Central",        "https://feeds.feedburner.com/androidcentral"),
+    ("9to5Google",             "https://9to5google.com/feed"),
+    ("Android Police",         "https://www.androidpolice.com/feed"),
+    ("SamMobile",              "https://www.sammobile.com/feed"),
+    ("Android Headlines",      "https://www.androidheadlines.com/feed"),
+    ("Pocketnow",              "https://pocketnow.com/feed"),
+
+    # Cybersecurity
+    ("Krebs on Security",      "https://krebsonsecurity.com/feed"),
+    ("The Hacker News",        "https://feeds.feedburner.com/TheHackersNews"),
+    ("BleepingComputer",       "https://www.bleepingcomputer.com/feed"),
+    ("Dark Reading",           "https://www.darkreading.com/rss.xml"),
+    ("SecurityWeek",           "https://www.securityweek.com/feed"),
+    ("CSO Online",             "https://www.csoonline.com/feed"),
+    ("Help Net Security",      "https://www.helpnetsecurity.com/feed"),
+    ("Schneier on Security",   "https://www.schneier.com/feed"),
+    ("Sophos",                 "https://news.sophos.com/en-us/feed/"),
+    
+    # Software Developer & Programming
+    ("Y Combinator Hacker News","https://news.ycombinator.com/rss"),
+    ("GitHub Blog",            "https://github.blog/feed"),
+    ("Stack Overflow Blog",    "https://stackoverflow.blog/feed"),
+    ("InfoQ",                  "https://feed.infoq.com"),
+    ("The New Stack",          "https://thenewstack.io/feed"),
+    ("Smashing Magazine",      "https://www.smashingmagazine.com/feed"),
+    ("CSS-Tricks",             "https://css-tricks.com/feed"),
+    ("freeCodeCamp",           "https://www.freecodecamp.org/news/rss"),
+    ("DEV Community",          "https://dev.to/feed"),
+    ("SitePoint",              "https://www.sitepoint.com/sitepoint.rss"),
+
+    # Apple Ecosystem
+    ("9to5Mac",                "https://9to5mac.com/feed"),
+    ("MacRumors",              "https://feeds.macrumors.com/MacRumors-All"),
+    ("AppleInsider",            "https://appleinsider.com/rss/news"),
+    ("Macworld",               "https://www.macworld.com/index.rss"),
+    ("iMore",                  "https://www.imore.com/rss.xml"),
+    ("iLounge",                "https://www.ilounge.com/feed"),
+
+    # Enterprise, IT & Cloud
+    ("MIT Technology Review",  "https://www.technologyreview.com/feed"),
+    ("TechRepublic",            "https://www.techrepublic.com/rssfeeds/articles/"),
+    ("IEEE Spectrum",          "https://feeds.feedburner.com/IeeeSpectrum"),
+    ("O'Reilly",               "https://feeds.feedburner.com/oreilly/radar"),
+    ("Redapt",                 "https://redapt.com/blog/rss.xml"),
+    
+    # Startups, Venture & Business of Tech
+    ("TechCrunch Startups",    "https://techcrunch.com/category/startups/feed/"),
+    ("VentureBeat",             "https://feeds.feedburner.com/venturebeat/SZYF"),
+    ("Tech.eu",                "https://tech.eu/feed"),
+    ("GeekWire",               "https://geekwire.com/feed"),
+    ("Silicon Republic",       "https://www.siliconrepublic.com/feed"),
+    ("Vulcan Post",            "https://vulcanpost.com/feed"),
+    ("Irish Tech News",        "https://irishtechnews.ie/feed"),
+    
+    # Culture, Opinion & Analysis
+    # ("Vox Technology",         "https://www.vox.com/rss/technology/index.xml"),
+    # ("The Next Web",           "https://feeds.feedburner.com/thenextweb"),
+    # ("Slashdot",               "https://rss.slashdot.org/Slashdot/slashdotMain"),
+    # ("Techdirt",               "https://feeds.feedburner.com/techdirt"),
+    # ("Firstpost Tech",         "https://www.firstpost.com/commonfeeds/v1.0/tech.xml"),
+    # ("HuffPost Tech",          "https://www.huffpost.com/section/technology/feed"),
+
+    # Tutorials, How-To & Explainers
+    ("MakeUseOf",               "https://www.makeuseof.com/feed/category/technology-explained/"),
+    ("gHacks",                 "https://www.ghacks.net/feed"),
+    ("Techopedia",             "https://www.techopedia.com/feed"),
+    ("Fossbytes",              "https://fossbytes.com/feed/?x=1"),
+    ("Teacher Tech",           "https://alicekeeler.com/feed"),
+    ("How-To Geek",            "https://www.howtogeek.com/feed/"),
+    ("BetaNews",               "https://betanews.com/feed/"),
+    
+    # Science & Emerging Tech
+    ("Ars Technica",           "https://feeds.arstechnica.com/arstechnica/index"),
+    ("New Scientist",          "https://www.newscientist.com/feed/home/"),
+    ("Quanta Magazine",        "https://www.quantamagazine.org/feed"),
+    ("Live Science",           "https://www.livescience.com/feeds/all"),
+    ("Phys.org",               "https://phys.org/rss-feed/physics-news"),
+    ("Tech Xplore",            "https://techxplore.com/rss-feed"),
+    ("ScienceDaily",           "https://www.sciencedaily.com/rss/all.xml"),
+    ("Interesting Engineering","https://interestingengineering.com/feed"),
+    ("Futurism",               "https://futurism.com/feed"),
+    
+    # IT Services, Consulting & Vendor Blogs
+    ("ISHIR",                 "https://www.ishir.com/feed"),
+    ("Office1",               "https://office1.com/blog/rss.xml"),
+    ("Tech Research Online",   "https://techresearchonline.com/blog/feed/"),
 ]
 
 # ─── Agent settings ──────────────────────────────────────────────────────────
-ARTICLES_PER_RUN   = 3    # how many new posts to create per GitHub Actions run
+ARTICLES_PER_RUN   = 4    # how many new posts to create per GitHub Actions run
 STATE_FILE         = "seen_articles.json"
-MIN_SUMMARY_LENGTH = 80   # chars — below this we try trafilatura for full text
+MIN_SUMMARY_LENGTH = 300   # chars — below this we try trafilatura for full text
 MODEL_CHAIN = [
     "gemini-3.5-flash-lite",
     "gemini-3.1-flash-lite",
@@ -112,11 +232,15 @@ def article_id(entry) -> str:
 
 def fetch_new_articles(seen: set) -> list[dict]:
     """
-    Poll all RSS feeds, return unseen articles as dicts.
-    Returns at most ARTICLES_PER_RUN entries.
+    Shuffle feeds, poll ARTICLES_PER_RUN of them, return one unseen article per feed.
     """
+    feeds = list(RSS_FEEDS)
+    random.shuffle(feeds)
+    selected = feeds[:ARTICLES_PER_RUN]
+    log.info(f"Selected {len(selected)} feeds this run: {[name for name, _ in selected]}")
+
     candidates = []
-    for source_name, feed_url in RSS_FEEDS:
+    for source_name, feed_url in selected:
         try:
             feed = feedparser.parse(feed_url)
             for entry in feed.entries:
@@ -130,12 +254,12 @@ def fetch_new_articles(seen: set) -> list[dict]:
                     "url":     entry.get("link", "").strip(),
                     "summary": entry.get("summary", "").strip(),
                 })
+                break  # one candidate per feed
         except Exception as e:
             log.warning(f"Failed to fetch feed {feed_url}: {e}")
 
-    log.info(f"Found {len(candidates)} unseen articles across all feeds")
-    # Take the first N — they're already in reverse-chronological order from feedparser
-    return candidates[:ARTICLES_PER_RUN]
+    log.info(f"Found {len(candidates)} unseen articles across selected feeds")
+    return candidates
 
 
 # ─── Full text extraction ─────────────────────────────────────────────────────
@@ -258,7 +382,8 @@ Article text:
 Instructions:
 - Write a fresh, original post. Do NOT copy sentences from the source. Rewrite everything.
 - Length: 350–500 words across 4–6 paragraphs.
-- Include Xetarev's practical, hype-skeptical perspective — add a sentence or two of genuine opinion.
+- Write objectively throughout. Do not insert Xetarev opinions or brand voice into the body.
+- The final paragraph only should include a single, natural, non-pushy sentence that briefly references a relevant Xetarev service (Studio for client/product work, Apps for software products). Only mention it if it fits organically: do not force it.
 - SEO-optimized: use the main topic keyword naturally in the title and early in the body.
 - The excerpt should be 1–2 sentences, punchy, suitable for a feed preview.
 - Paragraph 3 or 4 should include [IMAGE] as a placeholder on its own line — this is where the inline image will be inserted.
