@@ -216,3 +216,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# Python
+*.py[cod]
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Do NOT ignore seen_articles.json — it must be tracked and committed by the workflow
