@@ -39,11 +39,7 @@ jobs:
         run: python agent.py
 
       - name: Commit updated seen_articles.json
-        run: |
-          git config user.name "xetarev-agent[bot]"
-          git config user.email "xetarev-agent[bot]@users.noreply.github.com"
-          git add seen_articles.json
-          git diff --cached --quiet && exit 0
-          git commit -m "chore: update seen articles [skip ci]"
-          git pull --rebase origin main
-          git push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update seen articles [skip ci]"
+          file_pattern: seen_articles.json
