@@ -441,6 +441,17 @@ def post_to_payload(generated: dict, content_json: dict, featured_image_url: str
     # Ensure slug is URL-safe
     safe_slug = slugify(generated.get("slug") or generated.get("title", "post"))
 
+    # Check if slug already exists
+    check = httpx.get(
+        PAYLOAD_API_URL,
+        params={"where[slug][equals]": safe_slug, "limit": 1},
+        headers={"Authorization": f"JWT {jwt}"},
+        timeout=10
+    )
+    if check.status_code == 200 and check.json().get("totalDocs", 0) > 0:
+        log.warning(f"Slug already exists, skipping: {safe_slug}")
+        return False
+
     payload = {
         "title":         generated["title"],
         "slug":          safe_slug,

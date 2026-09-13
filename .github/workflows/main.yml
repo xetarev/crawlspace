@@ -42,9 +42,7 @@ jobs:
         run: |
           git config user.name "xetarev-agent[bot]"
           git config user.email "xetarev-agent[bot]@users.noreply.github.com"
-          git add seen_articles.json
-          git stash
           git pull --rebase origin main
-          git stash pop
+          git add seen_articles.json
           git diff --cached --quiet || git commit -m "chore: update seen articles [skip ci]"
           git push
