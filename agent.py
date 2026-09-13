@@ -404,16 +404,20 @@ def post_to_payload(generated: dict, content_json: dict, featured_image_url: str
     safe_slug = slugify(generated.get("slug") or generated.get("title", "post"))
 
     payload = {
-        "title":               generated["title"],
-        "slug":                safe_slug,
-        "excerpt":             generated.get("excerpt", ""),
-        "content":             content_json,
-        "featured_image_url":  featured_image_url,
-        "featured_image_alt":  generated["title"],
-        "meta_title":          generated["title"],
-        "meta_description":    generated.get("excerpt", ""),
-        "published_at":        now_iso,
-        "_status":             "published",
+        "title":         generated["title"],
+        "slug":          safe_slug,
+        "excerpt":       generated.get("excerpt", ""),
+        "content":       content_json,
+        "featuredImage": {
+            "url": featured_image_url,
+            "alt": generated["title"],
+        },
+        "meta": {
+            "title":       generated["title"],
+            "description": generated.get("excerpt", ""),
+        },
+        "publishedAt":   now_iso,
+        "_status":       "published",
     }
 
     headers = {
