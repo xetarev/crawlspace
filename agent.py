@@ -145,7 +145,8 @@ RSS_FEEDS = [
     # ("Interesting Engineering","https://interestingengineering.com/feed"),
 ]
 # ─── Agent settings ──────────────────────────────────────────────────────────
-ARTICLES_PER_RUN   = 4    # how many new posts to create per GitHub Actions run
+ARTICLES_PER_RUN   = 4    # articles fetched per batch
+MIN_PUBLISH        = ARTICLES_PER_RUN // 2  # publish at least 50% of batch size per run
 STATE_FILE         = "seen_articles.json"
 MIN_SUMMARY_LENGTH = 300   # chars — below this we try trafilatura for full text
 MODEL_CHAIN = [
@@ -240,16 +241,24 @@ def extract_feed_image(entry) -> str | None:
         if rel == "enclosure" and (link_type.startswith("image/") or _looks_like_image_url(url)):
             return url
     return None
-def fetch_new_articles(seen: set) -> list[dict]:
+def fetch_new_articles(seen: set, used_feeds: set | None = None) -> list[dict]:
     """
-    Shuffle feeds, poll ARTICLES_PER_RUN of them, return one unseen article per feed.
+    Shuffle unused feeds, poll up to ARTICLES_PER_RUN of them, return one unseen
+    article per feed. used_feeds tracks feed URLs already polled this run.
     """
-    feeds = list(RSS_FEEDS)
-    random.shuffle(feeds)
-    selected = feeds[:ARTICLES_PER_RUN]
-    log.info(f"Selected {len(selected)} feeds this run: {[name for name, _ in selected]}")
+    used = used_feeds if used_feeds is not None else set()
+    available = [(name, url) for name, url in RSS_FEEDS if url not in used]
+    if not available:
+        log.info("No unused feeds left to poll")
+        return []
+
+    random.shuffle(available)
+    selected = available[:ARTICLES_PER_RUN]
+    log.info(f"Selected {len(selected)} feeds this batch: {[name for name, _ in selected]}")
+
     candidates = []
     for source_name, feed_url in selected:
+        used.add(feed_url)
         try:
             feed = feedparser.parse(feed_url)
             for entry in feed.entries:
@@ -268,6 +277,7 @@ def fetch_new_articles(seen: set) -> list[dict]:
                 break  # one candidate per feed
         except Exception as e:
             log.warning(f"Failed to fetch feed {feed_url}: {e}")
+
     log.info(f"Found {len(candidates)} unseen articles across selected feeds")
     return candidates
 # ─── Full text extraction ─────────────────────────────────────────────────────
@@ -619,60 +629,90 @@ def main():
     if not jwt:
         log.error("Could not obtain Payload JWT. Exiting.")
         return
+
     seen = load_seen()
     log.info(f"Loaded {len(seen)} previously seen article IDs")
-    articles = fetch_new_articles(seen)
-    if not articles:
-        log.info("No new articles found this run. Exiting.")
-        return
+
     published_count = 0
-    for article in articles:
-        log.info(f"--- Processing: {article['title'][:70]} ---")
-        # 1. Get article text
-        body_text = get_article_text(article)
-        if not body_text:
-            log.warning("No usable text, skipping.")
-            seen.add(article["id"])
-            continue
-        # 2. Generate post content via Gemini
-        generated = generate_post(article, body_text)
-        if not generated:
-            log.warning("Gemini generation failed, skipping.")
-            seen.add(article["id"])
-            continue
-        if generated.get("skip"):
-            log.info(f"Skipping off-topic article (marked seen): {article['title'][:70]}")
-            seen.add(article["id"])
-            continue
-        # 3. Featured image: prefer RSS feed image; DDG / Picsum fallback.
-        #    Inline body image always via DDG (Picsum fallback), distinct from featured.
-        image_query = " ".join(generated.get("keywords", [])[:3]) or article["title"][:40]
-        feed_image = article.get("image")
-        if feed_image and is_image_accessible(feed_image):
-            featured_image_url = feed_image
-            log.info(f"Using RSS feed image for featured: {feed_image[:80]}")
-        else:
-            if feed_image:
-                log.info("RSS feed image present but not accessible; falling back to DDG")
-            featured_image_url = find_image_url(image_query)
-        inline_image_url = find_image_url(image_query, exclude_urls={featured_image_url})
-        # 4. Build Lexical content JSON
-        content_json = build_lexical_content(
-            paragraphs=generated.get("paragraphs", []),
-            image_url=inline_image_url,
-            image_alt=generated["title"],
+    processed_count = 0
+    used_feeds: set[str] = set()
+
+    while published_count < MIN_PUBLISH:
+        articles = fetch_new_articles(seen, used_feeds)
+        if not articles:
+            log.info("No more unseen articles available. Stopping.")
+            break
+
+        log.info(
+            f"Batch start — need {MIN_PUBLISH - published_count} more publish(es) "
+            f"(published so far: {published_count}/{MIN_PUBLISH})"
         )
-        # 5. POST to Payload
-        success = post_to_payload(generated, content_json, featured_image_url, jwt)
-        # 6. Mark as seen regardless of publish success
-        # (so a broken post doesn't retry and spam your CMS)
-        seen.add(article["id"])
-        if success:
-            published_count += 1
-        # Respect Gemini free tier rate limit — pause between articles
-        # At 3 articles per run this is negligible but good practice
-        time.sleep(3)
+
+        for article in articles:
+            if published_count >= MIN_PUBLISH:
+                break
+
+            log.info(f"--- Processing: {article['title'][:70]} ---")
+            processed_count += 1
+
+            # 1. Get article text
+            body_text = get_article_text(article)
+            if not body_text:
+                log.warning("No usable text, skipping.")
+                seen.add(article["id"])
+                continue
+
+            # 2. Generate post content via Gemini
+            generated = generate_post(article, body_text)
+            if not generated:
+                log.warning("Gemini generation failed, skipping.")
+                seen.add(article["id"])
+                continue
+
+            if generated.get("skip"):
+                log.info(f"Skipping off-topic article (marked seen): {article['title'][:70]}")
+                seen.add(article["id"])
+                continue
+
+            # 3. Featured image: prefer RSS feed image; DDG / Picsum fallback.
+            #    Inline body image always via DDG (Picsum fallback), distinct from featured.
+            image_query = " ".join(generated.get("keywords", [])[:3]) or article["title"][:40]
+            feed_image = article.get("image")
+            if feed_image and is_image_accessible(feed_image):
+                featured_image_url = feed_image
+                log.info(f"Using RSS feed image for featured: {feed_image[:80]}")
+            else:
+                if feed_image:
+                    log.info("RSS feed image present but not accessible; falling back to DDG")
+                featured_image_url = find_image_url(image_query)
+            inline_image_url = find_image_url(image_query, exclude_urls={featured_image_url})
+
+            # 4. Build Lexical content JSON
+            content_json = build_lexical_content(
+                paragraphs=generated.get("paragraphs", []),
+                image_url=inline_image_url,
+                image_alt=generated["title"],
+            )
+
+            # 5. POST to Payload
+            success = post_to_payload(generated, content_json, featured_image_url, jwt)
+
+            # 6. Mark as seen regardless of publish success
+            # (so a broken post doesn't retry and spam your CMS)
+            seen.add(article["id"])
+
+            if success:
+                published_count += 1
+
+            # Respect Gemini free tier rate limit — pause between articles
+            time.sleep(3)
+
     save_seen(seen)
-    log.info(f"=== Done. Published {published_count}/{len(articles)} posts this run. ===")
+    log.info(
+        f"=== Done. Published {published_count}/{MIN_PUBLISH} target "
+        f"({processed_count} articles processed, {len(used_feeds)} feeds polled). ==="
+    )
+
+
 if __name__ == "__main__":
     main()
