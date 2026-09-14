@@ -28,6 +28,9 @@ from google import genai
 from google.genai import types
 from slugify import slugify
 from datetime import datetime, timezone
+from ai_text_audit import Auditor
+from ai_text_audit.cli import format_terminal
+from texthumanize import humanize
 
 # Load .env when present (local runs). GitHub Actions already injects env vars;
 # load_dotenv does not override existing environment variables by default.
@@ -520,6 +523,268 @@ Respond ONLY with valid JSON, no markdown fences, no extra text. Format when wri
             return None
     log.error(f"All models in MODEL_CHAIN failed. Last error: {last_error}")
     return None
+
+
+# ─── Humanization + AI-audit pipeline ─────────────────────────────────────────
+# Note: "humanizer-skill" is not published on PyPI (Markdown/Node agent skill).
+# Stage 3 applies that skill's pattern catalog as a local deterministic pass.
+IMAGE_PLACEHOLDER = "[IMAGE]"
+
+_AI_VOCAB_REPLACEMENTS: dict[str, str] = {
+    "delve": "look into",
+    "crucial": "important",
+    "landscape": "field",
+    "leverage": "use",
+    "multifaceted": "complex",
+    "comprehensive": "thorough",
+    "facilitate": "help",
+    "streamline": "simplify",
+    "harness": "use",
+    "underscore": "highlight",
+    "illuminate": "show",
+    "embark": "start",
+    "foster": "build",
+    "endeavor": "effort",
+    "tapestry": "mix",
+    "showcase": "show",
+    "pivotal": "key",
+    "bolster": "strengthen",
+    "nuanced": "subtle",
+    "robust": "strong",
+    "paradigm": "model",
+    "synergy": "teamwork",
+    "holistic": "overall",
+    "myriad": "many",
+    "plethora": "plenty",
+    "groundbreaking": "new",
+    "cutting-edge": "latest",
+    "revolutionary": "major",
+}
+
+_AI_PHRASE_REMOVALS: tuple[str, ...] = (
+    "it's important to note that",
+    "it is important to note that",
+    "it's worth noting that",
+    "it is worth noting that",
+    "it's important to note",
+    "it is important to note",
+    "it's worth noting",
+    "it is worth noting",
+    "in today's rapidly evolving",
+    "in today's fast-paced",
+    "in the ever-evolving",
+    "in the realm of",
+    "at its core",
+    "at the end of the day",
+    "when it comes to",
+    "as we move forward",
+    "going forward",
+    "looking ahead",
+    "without further ado",
+    "let's dive in",
+    "let us dive in",
+    "in conclusion",
+    "to summarize",
+    "needless to say",
+)
+
+_HEDGING_PHRASES: tuple[str, ...] = (
+    "could potentially",
+    "might possibly",
+    "it could be argued that",
+    "it might be argued that",
+    "it seems that",
+    "it appears that",
+    "in some ways",
+    "to some extent",
+    "generally speaking",
+)
+
+_DELETE_WORDS: tuple[str, ...] = (
+    "moreover",
+    "furthermore",
+    "arguably",
+)
+
+
+def _join_paragraphs(paragraphs: list[str]) -> str:
+    return "\n\n".join(paragraphs)
+
+
+def _map_paragraphs(paragraphs: list[str], transform) -> list[str]:
+    """Apply transform to each paragraph; keep [IMAGE] exactly as-is."""
+    out: list[str] = []
+    for para in paragraphs:
+        if para.strip() == IMAGE_PLACEHOLDER:
+            out.append(IMAGE_PLACEHOLDER)
+        else:
+            out.append(transform(para))
+    return out
+
+
+def _case_aware_replace(matched: str, replacement: str) -> str:
+    if not replacement:
+        return ""
+    if matched.isupper():
+        return replacement.upper()
+    if matched[0].isupper():
+        return replacement[0].upper() + replacement[1:]
+    return replacement
+
+
+def _humanizer_skill_pattern_pass(text: str) -> str:
+    """
+    Deterministic cleanup pass mirroring the humanizer-skill pattern catalog:
+    hollow openers, hedging, AI vocabulary, em dashes, and leftover filler.
+    """
+    rewrite = text
+
+    for phrase in _AI_PHRASE_REMOVALS:
+        pattern = re.compile(re.escape(phrase) + r"[\s,]*", re.IGNORECASE)
+        rewrite = pattern.sub("", rewrite)
+
+    for phrase in _HEDGING_PHRASES:
+        pattern = re.compile(re.escape(phrase) + r"[\s,]*", re.IGNORECASE)
+        rewrite = pattern.sub("", rewrite)
+
+    for word in _DELETE_WORDS:
+        pattern = re.compile(r"\b" + re.escape(word) + r"\b[\s,]*", re.IGNORECASE)
+        rewrite = pattern.sub("", rewrite)
+
+    for word, replacement in _AI_VOCAB_REPLACEMENTS.items():
+        pattern = re.compile(r"\b" + re.escape(word) + r"\b", re.IGNORECASE)
+
+        def _swap(match: re.Match, _repl: str = replacement) -> str:
+            return _case_aware_replace(match.group(0), _repl)
+
+        rewrite = pattern.sub(_swap, rewrite)
+
+    if "—" in rewrite or "–" in rewrite:
+        rewrite = (
+            rewrite.replace(" — ", ", ")
+            .replace("—", ", ")
+            .replace(" – ", ", ")
+            .replace("–", ", ")
+        )
+
+    rewrite = re.sub(r" {2,}", " ", rewrite)
+    rewrite = re.sub(r" ([,.!?;:])", r"\1", rewrite)
+    rewrite = re.sub(r"\n{3,}", "\n\n", rewrite)
+    return rewrite.strip()
+
+
+def humanize_and_audit_paragraphs(
+    paragraphs: list[str], dry_run: bool = False
+) -> list[str]:
+    """
+    Four-stage pipeline on generated paragraphs:
+      1. AI audit (baseline score)
+      2. TextHumanize
+      3. Humanizer-skill pattern catalog pass
+      4. AI audit (post-humanization score + delta)
+    Failed stages are logged and skipped; remaining text continues.
+    """
+    paras = list(paragraphs or [])
+    baseline_score: float | None = None
+    final_score: float | None = None
+
+    # Stage 1 — AI Audit (baseline)
+    try:
+        result = Auditor().analyze(_join_paragraphs(paras))
+        baseline_score = float(result.score)
+        log.info(
+            f"AI audit baseline: score={result.score} verdict={result.verdict} "
+            f"patterns={len(result.patterns)}"
+        )
+        for p in result.patterns:
+            log.info(
+                f"  pattern={p.name} severity={p.severity} count={p.count}"
+            )
+        if dry_run:
+            dry_print(
+                "Stage 1 — AI Audit (baseline)",
+                format_terminal(result, filepath="generated post", verbose=True),
+            )
+            dry_print(
+                "Stage 1 — paragraph text (after)",
+                _join_paragraphs(paras),
+            )
+    except Exception as e:
+        log.error(f"Stage 1 AI audit failed (skipped): {e}")
+
+    # Stage 2 — TextHumanize
+    try:
+        def _th(para: str) -> str:
+            return humanize(para, lang="en").text
+
+        paras = _map_paragraphs(paras, _th)
+        log.info("TextHumanize ran")
+        if dry_run:
+            dry_print(
+                "Stage 2 — TextHumanize paragraph text (after)",
+                _join_paragraphs(paras),
+            )
+    except Exception as e:
+        log.error(f"Stage 2 TextHumanize failed (skipped): {e}")
+
+    # Stage 3 — Humanizer-Skill pattern pass
+    try:
+        paras = _map_paragraphs(paras, _humanizer_skill_pattern_pass)
+        log.info("Humanizer-Skill pattern pass ran")
+        if dry_run:
+            dry_print(
+                "Stage 3 — Humanizer-Skill pattern pass paragraph text (after)",
+                _join_paragraphs(paras),
+            )
+    except Exception as e:
+        log.error(f"Stage 3 Humanizer-Skill pattern pass failed (skipped): {e}")
+
+    # Stage 4 — AI Audit (post-humanization)
+    try:
+        result = Auditor().analyze(_join_paragraphs(paras))
+        final_score = float(result.score)
+        log.info(
+            f"AI audit final: score={result.score} verdict={result.verdict} "
+            f"patterns={len(result.patterns)}"
+        )
+        for p in result.patterns:
+            log.info(
+                f"  pattern={p.name} severity={p.severity} count={p.count}"
+            )
+        if dry_run:
+            dry_print(
+                "Stage 4 — AI Audit (post-humanization)",
+                format_terminal(result, filepath="generated post", verbose=True),
+            )
+            dry_print(
+                "Stage 4 — paragraph text (after)",
+                _join_paragraphs(paras),
+            )
+    except Exception as e:
+        log.error(f"Stage 4 AI audit failed (skipped): {e}")
+
+    if baseline_score is not None and final_score is not None:
+        delta = final_score - baseline_score
+        comparison = (
+            f"AI-tell score before: {baseline_score:.1f}\n"
+            f"AI-tell score after:  {final_score:.1f}\n"
+            f"Delta:                {delta:+.1f}"
+        )
+        log.info(
+            f"AI-tell score {baseline_score:.1f} → {final_score:.1f} ({delta:+.1f})"
+        )
+        print(f"\n[HUMANIZE] Score comparison\n{comparison}")
+        if dry_run:
+            dry_print("AI-tell score comparison (before → after)", comparison)
+    elif baseline_score is not None or final_score is not None:
+        log.info(
+            f"AI-tell score comparison incomplete "
+            f"(baseline={baseline_score}, final={final_score})"
+        )
+
+    return paras
+
+
 # ─── Lexical JSON builder ─────────────────────────────────────────────────────
 def build_lexical_content(paragraphs: list[str], image_url: str, image_alt: str) -> dict:
     """
@@ -797,6 +1062,12 @@ def main(dry_run: bool = False):
                 exclude_urls={featured_image_url},
                 dry_run=dry_run,
                 dry_label="Inline DDG image",
+            )
+
+            # 3b. Humanize + audit generated paragraphs (before Lexical build)
+            generated["paragraphs"] = humanize_and_audit_paragraphs(
+                generated.get("paragraphs", []),
+                dry_run=dry_run,
             )
 
             # 4. Build Lexical content JSON
