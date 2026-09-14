@@ -3,3 +3,4 @@ trafilatura
 google-genai
 httpx
 python-slugify
+python-dotenv

@@ -19,20 +19,36 @@ import hashlib
 import logging
 import random
 import re
+import argparse
 import httpx
 import feedparser
 import trafilatura
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from slugify import slugify
 from datetime import datetime, timezone
+
+# Load .env when present (local runs). GitHub Actions already injects env vars;
+# load_dotenv does not override existing environment variables by default.
+load_dotenv()
+
 # ─── Logging ────────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
 log = logging.getLogger(__name__)
-# ─── Config from GitHub Actions Secrets ────────────────────────────────────
+# ─── Dry-run diagnostics (stdout, separate from normal logging) ───────────────
+def dry_print(label: str, content: str = "") -> None:
+    """Print clearly labeled dry-run output so it stands out in the terminal."""
+    sep = "─" * 72
+    print(f"\n{sep}")
+    print(f"[DRY-RUN] {label}")
+    print(sep)
+    if content:
+        print(content)
+# ─── Config from env / GitHub Actions Secrets ───────────────────────────────
 GEMINI_API_KEY    = os.environ["GEMINI_API_KEY"]
 PAYLOAD_API_URL   = os.environ["PAYLOAD_API_URL"]   # e.g. https://your-app.vercel.app/api/inlight-posts
 PAYLOAD_API_TOKEN = os.environ["PAYLOAD_API_TOKEN"]
@@ -241,7 +257,7 @@ def extract_feed_image(entry) -> str | None:
         if rel == "enclosure" and (link_type.startswith("image/") or _looks_like_image_url(url)):
             return url
     return None
-def fetch_new_articles(seen: set, used_feeds: set | None = None) -> list[dict]:
+def fetch_new_articles(seen: set, used_feeds: set | None = None, dry_run: bool = False) -> list[dict]:
     """
     Shuffle unused feeds, poll up to ARTICLES_PER_RUN of them, return one unseen
     article per feed. used_feeds tracks feed URLs already polled this run.
@@ -250,11 +266,16 @@ def fetch_new_articles(seen: set, used_feeds: set | None = None) -> list[dict]:
     available = [(name, url) for name, url in RSS_FEEDS if url not in used]
     if not available:
         log.info("No unused feeds left to poll")
+        if dry_run:
+            dry_print("Feed selection", "No unused feeds left to poll")
         return []
 
     random.shuffle(available)
     selected = available[:ARTICLES_PER_RUN]
     log.info(f"Selected {len(selected)} feeds this batch: {[name for name, _ in selected]}")
+    if dry_run:
+        lines = [f"  - {name} ({url})" for name, url in selected]
+        dry_print("Feeds selected this batch", "\n".join(lines) if lines else "(none)")
 
     candidates = []
     for source_name, feed_url in selected:
@@ -281,7 +302,7 @@ def fetch_new_articles(seen: set, used_feeds: set | None = None) -> list[dict]:
     log.info(f"Found {len(candidates)} unseen articles across selected feeds")
     return candidates
 # ─── Full text extraction ─────────────────────────────────────────────────────
-def get_article_text(article: dict) -> str:
+def get_article_text(article: dict, dry_run: bool = False) -> str:
     """
     Return the best available text for an article.
     Uses RSS summary if long enough, otherwise fetches full text via trafilatura.
@@ -292,24 +313,33 @@ def get_article_text(article: dict) -> str:
     clean_summary = re.sub(r"<[^>]+>", "", summary).strip()
     if len(clean_summary) >= MIN_SUMMARY_LENGTH:
         log.info(f"Using RSS summary for: {article['title'][:60]}")
-        return clean_summary
-    log.info(f"Summary too short ({len(clean_summary)} chars), fetching full text: {article['url']}")
-    try:
-        downloaded = trafilatura.fetch_url(article["url"])
-        if downloaded:
-            text = trafilatura.extract(
-                downloaded,
-                include_formatting=False,
-                include_comments=False,
-                no_fallback=False,
-            )
-            if text and len(text) > len(clean_summary):
-                log.info(f"trafilatura extracted {len(text)} chars")
-                return text[:4000]  # cap to avoid burning Gemini tokens
-    except Exception as e:
-        log.warning(f"trafilatura failed for {article['url']}: {e}")
-    log.info("Falling back to RSS summary")
-    return clean_summary or article.get("title", "")
+        text = clean_summary
+    else:
+        log.info(f"Summary too short ({len(clean_summary)} chars), fetching full text: {article['url']}")
+        text = None
+        try:
+            downloaded = trafilatura.fetch_url(article["url"])
+            if downloaded:
+                extracted = trafilatura.extract(
+                    downloaded,
+                    include_formatting=False,
+                    include_comments=False,
+                    no_fallback=False,
+                )
+                if extracted and len(extracted) > len(clean_summary):
+                    log.info(f"trafilatura extracted {len(extracted)} chars")
+                    text = extracted[:4000]  # cap to avoid burning Gemini tokens
+        except Exception as e:
+            log.warning(f"trafilatura failed for {article['url']}: {e}")
+        if text is None:
+            log.info("Falling back to RSS summary")
+            text = clean_summary or article.get("title", "")
+    if dry_run:
+        dry_print(
+            "Extracted article text (before Gemini)",
+            text if text else "(empty)",
+        )
+    return text
 # ─── Image search ─────────────────────────────────────────────────────────────
 def is_image_accessible(url: str) -> bool:
     """Return True if a HEAD request to url returns status 200."""
@@ -323,7 +353,12 @@ def is_image_accessible(url: str) -> bool:
         return r.status_code == 200
     except Exception:
         return False
-def find_image_url(query: str, exclude_urls: set[str] | None = None) -> str:
+def find_image_url(
+    query: str,
+    exclude_urls: set[str] | None = None,
+    dry_run: bool = False,
+    dry_label: str = "Image search",
+) -> str:
     """
     Search DuckDuckGo Images for a relevant image URL.
     Tries each result until one is accessible via HEAD.
@@ -357,6 +392,11 @@ def find_image_url(query: str, exclude_urls: set[str] | None = None) -> str:
                 continue
             if is_image_accessible(image):
                 log.info(f"DDG image found (accessible): {image[:80]}")
+                if dry_run:
+                    dry_print(
+                        dry_label,
+                        f"URL: {image}\nAccessibility check: PASSED",
+                    )
                 return image
     except Exception as e:
         log.warning(f"DDG image search failed: {e}")
@@ -368,6 +408,12 @@ def find_image_url(query: str, exclude_urls: set[str] | None = None) -> str:
     if fallback in exclude:
         seed_int = (seed_int + 1) % 1000
         fallback = f"https://picsum.photos/seed/{seed_int}/1200/630"
+    if dry_run:
+        dry_print(
+            dry_label,
+            f"URL: {fallback}\nAccessibility check: FAILED / N/A "
+            f"(Picsum fallback — no accessible DDG result)",
+        )
     return fallback
 # ─── Gemini content generation ────────────────────────────────────────────────
 def _is_model_not_found(exc: Exception) -> bool:
@@ -383,7 +429,7 @@ def _is_model_not_found(exc: Exception) -> bool:
     if status in (404, "NOT_FOUND"):
         return True
     return False
-def generate_post(article: dict, body_text: str) -> dict | None:
+def generate_post(article: dict, body_text: str, dry_run: bool = False) -> dict | None:
     """
     Call Gemini to produce a structured JSON response with all post fields.
     Tries each model in MODEL_CHAIN until one succeeds.
@@ -437,6 +483,8 @@ Respond ONLY with valid JSON, no markdown fences, no extra text. Format when wri
                 config=types.GenerateContentConfig(max_output_tokens=1000),
             )
             raw = response.text.strip()
+            if dry_run:
+                dry_print("Raw Gemini response (before JSON parsing)", raw)
             # Strip markdown code fences if Gemini adds them despite instructions
             raw = re.sub(r"^```json\s*", "", raw)
             raw = re.sub(r"^```\s*", "", raw)
@@ -446,6 +494,19 @@ Respond ONLY with valid JSON, no markdown fences, no extra text. Format when wri
                 log.info(f"Gemini ({model_name}) skipped article as off-topic: {article['title'][:60]}")
             else:
                 log.info(f"Gemini ({model_name}) generated post: {data.get('title', '')[:60]}")
+                if dry_run:
+                    paragraphs = data.get("paragraphs") or []
+                    para_block = "\n".join(
+                        f"  [{i}] {p}" for i, p in enumerate(paragraphs, start=1)
+                    )
+                    dry_print(
+                        "Parsed post fields",
+                        f"title: {data.get('title', '')}\n"
+                        f"slug: {data.get('slug', '')}\n"
+                        f"excerpt: {data.get('excerpt', '')}\n"
+                        f"keywords: {data.get('keywords', [])}\n"
+                        f"paragraphs ({len(paragraphs)}):\n{para_block}",
+                    )
             return data
         except json.JSONDecodeError as e:
             log.error(f"Gemini ({model_name}) returned invalid JSON: {e}\nRaw response: {raw[:300]}")
@@ -623,12 +684,21 @@ def post_to_payload(generated: dict, content_json: dict, featured_image_url: str
         log.error(f"Payload POST failed: {e}")
         return False
 # ─── Main pipeline ────────────────────────────────────────────────────────────
-def main():
+def main(dry_run: bool = False):
     log.info("=== Xetarev SEO News Agent starting ===")
-    jwt = get_payload_jwt()
-    if not jwt:
-        log.error("Could not obtain Payload JWT. Exiting.")
-        return
+    if dry_run:
+        dry_print(
+            "Mode",
+            "Dry-run enabled — Payload POST and seen_articles.json updates are skipped.\n"
+            "Pipeline still fetches feeds, extracts text, calls Gemini, and resolves images.",
+        )
+
+    jwt = None
+    if not dry_run:
+        jwt = get_payload_jwt()
+        if not jwt:
+            log.error("Could not obtain Payload JWT. Exiting.")
+            return
 
     seen = load_seen()
     log.info(f"Loaded {len(seen)} previously seen article IDs")
@@ -638,7 +708,7 @@ def main():
     used_feeds: set[str] = set()
 
     while published_count < MIN_PUBLISH:
-        articles = fetch_new_articles(seen, used_feeds)
+        articles = fetch_new_articles(seen, used_feeds, dry_run=dry_run)
         if not articles:
             log.info("No more unseen articles available. Stopping.")
             break
@@ -655,22 +725,45 @@ def main():
             log.info(f"--- Processing: {article['title'][:70]} ---")
             processed_count += 1
 
+            if dry_run:
+                dry_print(
+                    "Raw RSS article",
+                    f"title:  {article.get('title', '')}\n"
+                    f"url:    {article.get('url', '')}\n"
+                    f"source: {article.get('source', '')}",
+                )
+
             # 1. Get article text
-            body_text = get_article_text(article)
+            body_text = get_article_text(article, dry_run=dry_run)
             if not body_text:
                 log.warning("No usable text, skipping.")
+                if dry_run:
+                    dry_print(
+                        "Outcome",
+                        "SKIPPED — no usable article text extracted",
+                    )
                 seen.add(article["id"])
                 continue
 
             # 2. Generate post content via Gemini
-            generated = generate_post(article, body_text)
+            generated = generate_post(article, body_text, dry_run=dry_run)
             if not generated:
                 log.warning("Gemini generation failed, skipping.")
+                if dry_run:
+                    dry_print(
+                        "Outcome",
+                        "SKIPPED — Gemini generation failed or returned invalid JSON",
+                    )
                 seen.add(article["id"])
                 continue
 
             if generated.get("skip"):
                 log.info(f"Skipping off-topic article (marked seen): {article['title'][:70]}")
+                if dry_run:
+                    dry_print(
+                        "Outcome",
+                        "SKIPPED — Gemini marked article as off-topic (skip: true)",
+                    )
                 seen.add(article["id"])
                 continue
 
@@ -678,14 +771,33 @@ def main():
             #    Inline body image always via DDG (Picsum fallback), distinct from featured.
             image_query = " ".join(generated.get("keywords", [])[:3]) or article["title"][:40]
             feed_image = article.get("image")
-            if feed_image and is_image_accessible(feed_image):
+            feed_accessible = False
+            if feed_image:
+                feed_accessible = is_image_accessible(feed_image)
+            if dry_run:
+                dry_print(
+                    "Featured image (from RSS)",
+                    f"URL: {feed_image or '(none)'}\n"
+                    f"Accessibility check: "
+                    f"{'PASSED' if feed_accessible else 'FAILED' if feed_image else 'N/A (no RSS image)'}",
+                )
+            if feed_image and feed_accessible:
                 featured_image_url = feed_image
                 log.info(f"Using RSS feed image for featured: {feed_image[:80]}")
             else:
                 if feed_image:
                     log.info("RSS feed image present but not accessible; falling back to DDG")
-                featured_image_url = find_image_url(image_query)
-            inline_image_url = find_image_url(image_query, exclude_urls={featured_image_url})
+                featured_image_url = find_image_url(
+                    image_query,
+                    dry_run=dry_run,
+                    dry_label="Featured image (DDG / Picsum fallback)",
+                )
+            inline_image_url = find_image_url(
+                image_query,
+                exclude_urls={featured_image_url},
+                dry_run=dry_run,
+                dry_label="Inline DDG image",
+            )
 
             # 4. Build Lexical content JSON
             content_json = build_lexical_content(
@@ -694,8 +806,23 @@ def main():
                 image_alt=generated["title"],
             )
 
-            # 5. POST to Payload
-            success = post_to_payload(generated, content_json, featured_image_url, jwt)
+            if dry_run:
+                dry_print(
+                    "Final Lexical JSON (would be sent to Payload)",
+                    json.dumps(content_json, indent=2),
+                )
+                dry_print(
+                    "Outcome",
+                    "WOULD PUBLISH — Payload POST skipped (dry-run)\n"
+                    f"title: {generated.get('title', '')}\n"
+                    f"slug:  {slugify(generated.get('slug') or generated.get('title', 'post'))}\n"
+                    f"featured_image: {featured_image_url}\n"
+                    f"inline_image:   {inline_image_url}",
+                )
+                success = True
+            else:
+                # 5. POST to Payload
+                success = post_to_payload(generated, content_json, featured_image_url, jwt)
 
             # 6. Mark as seen regardless of publish success
             # (so a broken post doesn't retry and spam your CMS)
@@ -707,7 +834,13 @@ def main():
             # Respect Gemini free tier rate limit — pause between articles
             time.sleep(3)
 
-    save_seen(seen)
+    if dry_run:
+        dry_print(
+            "save_seen",
+            f"SKIPPED — would have saved {len(seen)} seen article IDs to {STATE_FILE}",
+        )
+    else:
+        save_seen(seen)
     log.info(
         f"=== Done. Published {published_count}/{MIN_PUBLISH} target "
         f"({processed_count} articles processed, {len(used_feeds)} feeds polled). ==="
@@ -715,4 +848,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Xetarev SEO News Agent")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Run the full pipeline without publishing to Payload or updating seen_articles.json; print verbose diagnostics",
+    )
+    args = parser.parse_args()
+    main(dry_run=args.dry_run)
