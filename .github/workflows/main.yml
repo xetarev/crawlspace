@@ -1,11 +1,11 @@
 name: Xetarev Crawlspace (Agent)
 
 on:
-  schedule:
-    # Runs every hour at :00 UTC — 24 posts/day max
-    # Change */2 for every 2 hours, etc.
-    - cron: '0 * * * *'
   workflow_dispatch:
+    # schedule:
+    #   # Runs every hour at :00 UTC — 24 posts/day max
+    #   # Change */2 for every 2 hours, etc.
+    #   - cron: '0 * * * *'
     # Lets you trigger a manual run from the Actions tab in GitHub
     # Use this to test before the first scheduled run fires
 
