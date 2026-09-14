@@ -6,8 +6,8 @@ Pipeline:
   1. Poll RSS feeds for new articles
   2. Filter unseen articles using seen_articles.json
   3. Fetch full article text via trafilatura
-  4. Search Unsplash for a relevant image URL
-  5. Generate SEO post via Gemini (title, slug, excerpt, body)
+  4. Prefer featured image from RSS feed data; DuckDuckGo / Picsum as fallback
+  5. Generate SEO post via Gemini (title, slug, excerpt, body) — or skip if off-topic
   6. Build Payload Lexical JSON content structure
   7. POST to Payload CMS REST API as published
   8. Commit updated seen_articles.json back to repo
@@ -126,17 +126,14 @@ RSS_FEEDS = [
     ("TechRepublic",            "https://www.techrepublic.com/rssfeeds/articles/"),
     ("IEEE Spectrum",          "https://feeds.feedburner.com/IeeeSpectrum"),
     ("O'Reilly",               "https://feeds.feedburner.com/oreilly/radar"),
-    ("Redapt",                 "https://redapt.com/blog/rss.xml"),
-    
+
     # Startups, Venture & Business of Tech
     ("TechCrunch Startups",    "https://techcrunch.com/category/startups/feed/"),
     ("VentureBeat",             "https://feeds.feedburner.com/venturebeat/SZYF"),
     ("Tech.eu",                "https://tech.eu/feed"),
     ("GeekWire",               "https://geekwire.com/feed"),
     ("Silicon Republic",       "https://www.siliconrepublic.com/feed"),
-    ("Vulcan Post",            "https://vulcanpost.com/feed"),
-    ("Irish Tech News",        "https://irishtechnews.ie/feed"),
-    
+
     # Culture, Opinion & Analysis
     # ("Vox Technology",         "https://www.vox.com/rss/technology/index.xml"),
     # ("The Next Web",           "https://feeds.feedburner.com/thenextweb"),
@@ -148,12 +145,10 @@ RSS_FEEDS = [
     # Tutorials, How-To & Explainers
     ("MakeUseOf",               "https://www.makeuseof.com/feed/category/technology-explained/"),
     ("gHacks",                 "https://www.ghacks.net/feed"),
-    ("Techopedia",             "https://www.techopedia.com/feed"),
     ("Fossbytes",              "https://fossbytes.com/feed/?x=1"),
-    ("Teacher Tech",           "https://alicekeeler.com/feed"),
     ("How-To Geek",            "https://www.howtogeek.com/feed/"),
     ("BetaNews",               "https://betanews.com/feed/"),
-    
+
     # Science & Emerging Tech
     ("Ars Technica",           "https://feeds.arstechnica.com/arstechnica/index"),
     ("New Scientist",          "https://www.newscientist.com/feed/home/"),
@@ -164,11 +159,6 @@ RSS_FEEDS = [
     ("ScienceDaily",           "https://www.sciencedaily.com/rss/all.xml"),
     ("Interesting Engineering","https://interestingengineering.com/feed"),
     ("Futurism",               "https://futurism.com/feed"),
-    
-    # IT Services, Consulting & Vendor Blogs
-    ("ISHIR",                 "https://www.ishir.com/feed"),
-    ("Office1",               "https://office1.com/blog/rss.xml"),
-    ("Tech Research Online",   "https://techresearchonline.com/blog/feed/"),
 ]
 
 # ─── Agent settings ──────────────────────────────────────────────────────────
@@ -185,22 +175,18 @@ MODEL_CHAIN = [
 
 # ─── Xetarev brand context injected into every Gemini prompt ────────────────
 BRAND_CONTEXT = """
-You are a content writer for Xetarev, an indie tech company.
+You write for Xetarev Inlight — an indie tech company's blog.
 
-About Xetarev:
-- 6-year-old indie tech company, started as a tech blog in 2020
-- Ships its own software products (Apps division) and takes boutique client work (Studio)
-- Unincorporated but operates as a serious, defined brand
-- Xetarev Studio covers full product lifecycle: design, development, strategy
-- Studio is selective and intentional — not a volume agency
+About the company (context only — do not plug it in posts):
+- Indie tech shop: ships its own products (Apps) and selective client work (Studio)
+- Roots for builders, small teams, and craft over hype
 
-Voice and angle:
-- Practical and skeptical of hype — always ask "does this actually matter?"
-- Opinionated but grounded. We respect craft and good engineering.
-- We are indie, so we naturally root for independent creators, small teams, and builders
-- We find large corporate moves interesting but call out spin when we see it
-- Tone: sharp, informed, direct. Not casual blog-speak. Not corporate press release.
-- Write like a smart founder commenting on the industry, not a journalist covering it.
+Voice:
+- Write like a knowledgeable person with a point of view, not a content pipeline
+- First person where it feels natural ("I think…", "here's what matters…")
+- Direct opinions. Sharp and informed. Human.
+- Skeptical of hype; call out spin. Respect good engineering.
+- No corporate press-release tone. No generic AI-blog filler.
 """
 
 
@@ -230,6 +216,68 @@ def article_id(entry) -> str:
 
 # ─── RSS polling ─────────────────────────────────────────────────────────────
 
+def _looks_like_image_url(url: str) -> bool:
+    if not url or not url.startswith(("http://", "https://")):
+        return False
+    path = url.split("?", 1)[0].lower()
+    return any(path.endswith(ext) for ext in (
+        ".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif", ".svg",
+    )) or "/image" in path or "img" in path
+
+
+def extract_feed_image(entry) -> str | None:
+    """
+    Pull a featured image URL from feedparser entry fields when present.
+    Checks media_content, media_thumbnail, enclosure, and links.
+    """
+    # media_content: list of dicts with 'url' / 'type' / 'medium'
+    for media in entry.get("media_content") or []:
+        url = (media.get("url") or "").strip()
+        if not url:
+            continue
+        media_type = (media.get("type") or "").lower()
+        medium = (media.get("medium") or "").lower()
+        if medium == "image" or media_type.startswith("image/") or _looks_like_image_url(url):
+            return url
+        # Some feeds omit type/medium but still put the hero image here
+        if not media_type and not medium:
+            return url
+
+    # media_thumbnail: list of dicts with 'url'
+    for thumb in entry.get("media_thumbnail") or []:
+        url = (thumb.get("url") or "").strip()
+        if url:
+            return url
+
+    # enclosure / enclosures
+    enclosures = entry.get("enclosures") or []
+    if not enclosures and entry.get("enclosure"):
+        enclosures = [entry.get("enclosure")]
+    for enc in enclosures:
+        if not isinstance(enc, dict):
+            continue
+        url = (enc.get("href") or enc.get("url") or "").strip()
+        enc_type = (enc.get("type") or "").lower()
+        if url and (enc_type.startswith("image/") or _looks_like_image_url(url)):
+            return url
+
+    # links with image type or rel=enclosure / image / thumbnail
+    for link in entry.get("links") or []:
+        if not isinstance(link, dict):
+            continue
+        url = (link.get("href") or "").strip()
+        if not url:
+            continue
+        link_type = (link.get("type") or "").lower()
+        rel = (link.get("rel") or "").lower()
+        if link_type.startswith("image/") or rel in ("image", "thumbnail"):
+            return url
+        if rel == "enclosure" and (link_type.startswith("image/") or _looks_like_image_url(url)):
+            return url
+
+    return None
+
+
 def fetch_new_articles(seen: set) -> list[dict]:
     """
     Shuffle feeds, poll ARTICLES_PER_RUN of them, return one unseen article per feed.
@@ -247,12 +295,14 @@ def fetch_new_articles(seen: set) -> list[dict]:
                 uid = article_id(entry)
                 if uid in seen:
                     continue
+                feed_image = extract_feed_image(entry)
                 candidates.append({
                     "id":      uid,
                     "source":  source_name,
                     "title":   entry.get("title", "").strip(),
                     "url":     entry.get("link", "").strip(),
                     "summary": entry.get("summary", "").strip(),
+                    "image":   feed_image,
                 })
                 break  # one candidate per feed
         except Exception as e:
@@ -386,6 +436,7 @@ def generate_post(article: dict, body_text: str) -> dict | None:
     Call Gemini to produce a structured JSON response with all post fields.
     Tries each model in MODEL_CHAIN until one succeeds.
     Returns a dict with: title, slug, excerpt, paragraphs (list of strings), keywords (list)
+    May return {"skip": true} when the source is off-topic.
     Returns None if generation fails.
     """
     client = genai.Client(api_key=GEMINI_API_KEY)
@@ -402,16 +453,21 @@ Article text:
 {body_text[:3000]}
 \"\"\"
 
-Instructions:
+Relevance gate (do this first):
+- The source must be a strong fit for: technology, software, AI, startups, developer tools, cybersecurity, or indie building.
+- If it is not a strong fit, respond ONLY with: {{"skip": true}}
+- Do not write a post for weak or tangential topics (lifestyle fluff, unrelated politics, pure entertainment, education-for-teachers, generic vendor marketing, etc.).
+
+Instructions (only if relevant):
 - Write a fresh, original post. Do NOT copy sentences from the source. Rewrite everything.
 - Length: 350–500 words across 4–6 paragraphs.
-- Write objectively throughout. Do not insert Xetarev opinions or brand voice into the body.
-- The final paragraph only should include a single, natural, non-pushy sentence that briefly references a relevant Xetarev service (Studio for client/product work, Apps for software products). Only mention it if it fits organically: do not force it.
+- Voice: knowledgeable individual with a point of view. First person where natural. Direct opinions. Sharp, informed, human — not an AI content pipeline.
+- End the post naturally. Do NOT mention Xetarev, Xetarev Studio, or Xetarev Apps.
 - SEO-optimized: use the main topic keyword naturally in the title and early in the body.
 - The excerpt should be 1–2 sentences, punchy, suitable for a feed preview.
 - Paragraph 3 or 4 should include [IMAGE] as a placeholder on its own line — this is where the inline image will be inserted.
 
-Respond ONLY with valid JSON, no markdown fences, no extra text. Format:
+Respond ONLY with valid JSON, no markdown fences, no extra text. Format when writing a post:
 {{
   "title": "...",
   "slug": "...",
@@ -441,7 +497,10 @@ Respond ONLY with valid JSON, no markdown fences, no extra text. Format:
             raw = re.sub(r"^```\s*", "", raw)
             raw = re.sub(r"\s*```$", "", raw)
             data = json.loads(raw)
-            log.info(f"Gemini ({model_name}) generated post: {data.get('title', '')[:60]}")
+            if data.get("skip"):
+                log.info(f"Gemini ({model_name}) skipped article as off-topic: {article['title'][:60]}")
+            else:
+                log.info(f"Gemini ({model_name}) generated post: {data.get('title', '')[:60]}")
             return data
         except json.JSONDecodeError as e:
             log.error(f"Gemini ({model_name}) returned invalid JSON: {e}\nRaw response: {raw[:300]}")
@@ -675,10 +734,22 @@ def main():
             seen.add(article["id"])
             continue
 
-        # 3. Find images — one for featured, one for inline body (must be distinct)
-        # Use the post title/keywords as the search query
+        if generated.get("skip"):
+            log.info(f"Skipping off-topic article (marked seen): {article['title'][:70]}")
+            seen.add(article["id"])
+            continue
+
+        # 3. Featured image: prefer RSS feed image; DDG / Picsum fallback.
+        #    Inline body image always via DDG (Picsum fallback), distinct from featured.
         image_query = " ".join(generated.get("keywords", [])[:3]) or article["title"][:40]
-        featured_image_url = find_image_url(image_query)
+        feed_image = article.get("image")
+        if feed_image and is_image_accessible(feed_image):
+            featured_image_url = feed_image
+            log.info(f"Using RSS feed image for featured: {feed_image[:80]}")
+        else:
+            if feed_image:
+                log.info("RSS feed image present but not accessible; falling back to DDG")
+            featured_image_url = find_image_url(image_query)
         inline_image_url = find_image_url(image_query, exclude_urls={featured_image_url})
 
         # 4. Build Lexical content JSON
