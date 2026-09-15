@@ -1,17 +1,52 @@
 {
+  "https://appleinsider.com/rss/news": {
+    "name": "AppleInsider",
+    "published": 0,
+    "skipped": 1
+  },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
     "published": 1,
     "skipped": 0
+  },
+  "https://developer.nvidia.com/blog//feed": {
+    "name": "NVIDIA Developer",
+    "published": 0,
+    "skipped": 1
+  },
+  "https://feeds.feedburner.com/venturebeat/SZYF": {
+    "name": "VentureBeat",
+    "published": 1,
+    "skipped": 0
+  },
+  "https://feeds.macrumors.com/MacRumors-All": {
+    "name": "MacRumors",
+    "published": 0,
+    "skipped": 1
+  },
+  "https://gizmodo.com/rss": {
+    "name": "Gizmodo",
+    "published": 0,
+    "skipped": 1
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
     "published": 1,
     "skipped": 0
   },
+  "https://www.gsmarena.com/rss-news-reviews.php3": {
+    "name": "GSMArena",
+    "published": 0,
+    "skipped": 1
+  },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
     "published": 0,
     "skipped": 1
+  },
+  "https://www.tomshardware.com/feeds.xml": {
+    "name": "Tom's Hardware",
+    "published": 1,
+    "skipped": 0
   }
 }

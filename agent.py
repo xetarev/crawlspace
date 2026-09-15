@@ -22,6 +22,7 @@ import hashlib
 import logging
 import random
 import re
+import ssl
 import argparse
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -215,6 +216,32 @@ class TransientHTTPError(Exception):
         self.retry_after = retry_after
 
 
+class NonRetryableHTTPError(Exception):
+    """Permanent failures (e.g. SSL/certificate) that must not use the retry ladder."""
+
+
+def _is_ssl_cert_error(exc: BaseException | None) -> bool:
+    """True for certificate verify / expired / SSL errors that won't heal on retry."""
+    if exc is None:
+        return False
+    if isinstance(exc, ssl.SSLError):
+        return True
+    reason = getattr(exc, "reason", None)
+    if isinstance(reason, BaseException) and _is_ssl_cert_error(reason):
+        return True
+    cause = getattr(exc, "__cause__", None) or getattr(exc, "__context__", None)
+    if isinstance(cause, BaseException) and cause is not exc and _is_ssl_cert_error(cause):
+        return True
+    msg = str(exc).lower()
+    return (
+        "certificate_verify_failed" in msg
+        or "certificate verify failed" in msg
+        or "certificate has expired" in msg
+        or "ssl: certificate" in msg
+        or "sslcertverificationerror" in msg
+    )
+
+
 def _is_retryable_http_status(status_code: int) -> bool:
     return status_code in (408, 425, 429) or status_code >= 500
 
@@ -281,12 +308,14 @@ def call_with_http_retries(operation, *, label: str, max_attempts: int = HTTP_MA
     """
     Run operation() with exponential backoff on TransientHTTPError.
     429 uses a longer ladder than timeouts/5xx; Retry-After wins when present.
-    Non-transient exceptions propagate immediately.
+    NonRetryableHTTPError and other non-transient exceptions propagate immediately.
     """
     last_error: Exception | None = None
     for attempt in range(1, max_attempts + 1):
         try:
             return operation()
+        except NonRetryableHTTPError:
+            raise
         except TransientHTTPError as e:
             last_error = e
             if attempt >= max_attempts:
@@ -336,6 +365,8 @@ def http_request(
             httpx.NetworkError,
             httpx.RemoteProtocolError,
         ) as e:
+            if _is_ssl_cert_error(e):
+                raise NonRetryableHTTPError(f"SSL/certificate error: {e}") from e
             raise TransientHTTPError(str(e)) from e
         if retryable_statuses and _is_retryable_http_status(response.status_code):
             retry_after = _parse_retry_after_seconds(
@@ -352,7 +383,9 @@ def http_request(
 
 
 def parse_feed_with_retries(feed_url: str):
-    """feedparser.parse with retries on transient HTTP / network failures."""
+    """feedparser.parse with retries on transient HTTP / network failures.
+    SSL/certificate errors fail immediately (no backoff ladder).
+    """
 
     def _do():
         feed = feedparser.parse(feed_url)
@@ -366,6 +399,10 @@ def parse_feed_with_retries(feed_url: str):
         if getattr(feed, "bozo", False) and not getattr(feed, "entries", None):
             bozo_exc = getattr(feed, "bozo_exception", None)
             if bozo_exc is not None:
+                if _is_ssl_cert_error(bozo_exc):
+                    raise NonRetryableHTTPError(
+                        f"SSL/certificate error: {bozo_exc}"
+                    ) from bozo_exc
                 raise TransientHTTPError(str(bozo_exc)) from bozo_exc
         return feed
 
@@ -376,12 +413,15 @@ def fetch_url_with_retries(url: str) -> str:
     """
     trafilatura.fetch_url with retries.
     Raises TransientHTTPError when all attempts return nothing or error.
+    SSL/certificate errors fail immediately.
     """
 
     def _do():
         try:
             downloaded = trafilatura.fetch_url(url)
         except Exception as e:
+            if _is_ssl_cert_error(e):
+                raise NonRetryableHTTPError(f"SSL/certificate error: {e}") from e
             raise TransientHTTPError(str(e)) from e
         if not downloaded:
             raise TransientHTTPError("empty response / fetch failed")
@@ -584,9 +624,12 @@ def fetch_new_articles(
         ]
         dry_print("Feeds selected this batch", "\n".join(lines) if lines else "(none)")
 
-    candidates = []
-    for source_name, feed_url in selected:
+    candidates: list[dict] = []
+    # Mark selected feeds used up front so parallel workers don't double-poll.
+    for _, feed_url in selected:
         used.add(feed_url)
+
+    def _poll_one(source_name: str, feed_url: str) -> dict | None:
         try:
             feed = parse_feed_with_retries(feed_url)
             for entry in feed.entries:
@@ -594,7 +637,7 @@ def fetch_new_articles(
                 if uid in seen:
                     continue
                 feed_image = extract_feed_image(entry)
-                candidates.append({
+                return {
                     "id":       uid,
                     "source":   source_name,
                     "feed_url": feed_url,
@@ -602,12 +645,28 @@ def fetch_new_articles(
                     "url":      entry.get("link", "").strip(),
                     "summary":  entry.get("summary", "").strip(),
                     "image":    feed_image,
-                })
-                break  # one candidate per feed
+                }
+            return None
+        except NonRetryableHTTPError as e:
+            log.warning(f"Failed to fetch feed {feed_url} (non-retryable): {e}")
+            return None
         except TransientHTTPError as e:
             log.warning(f"Failed to fetch feed after retries {feed_url}: {e}")
+            return None
         except Exception as e:
             log.warning(f"Failed to fetch feed {feed_url}: {e}")
+            return None
+
+    workers = min(8, len(selected)) if selected else 1
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = [
+            pool.submit(_poll_one, source_name, feed_url)
+            for source_name, feed_url in selected
+        ]
+        for fut in as_completed(futures):
+            article = fut.result()
+            if article:
+                candidates.append(article)
 
     log.info(f"Found {len(candidates)} unseen articles across selected feeds")
     return candidates
@@ -630,7 +689,7 @@ def get_article_text(article: dict, dry_run: bool = False) -> str:
     else:
         log.info(f"Summary too short ({len(clean_summary)} chars), fetching full text: {article['url']}")
         text = None
-        fetch_failed = False
+        transient_fetch_failed = False
         try:
             downloaded = fetch_url_with_retries(article["url"])
             extracted = trafilatura.extract(
@@ -642,12 +701,14 @@ def get_article_text(article: dict, dry_run: bool = False) -> str:
             if extracted and len(extracted) > len(clean_summary):
                 log.info(f"trafilatura extracted {len(extracted)} chars")
                 text = extracted[:4000]  # cap to avoid burning Gemini tokens
+        except NonRetryableHTTPError as e:
+            log.warning(f"trafilatura non-retryable failure for {article['url']}: {e}")
         except TransientHTTPError as e:
-            fetch_failed = True
+            transient_fetch_failed = True
             log.warning(f"trafilatura failed after retries for {article['url']}: {e}")
         if text is None:
-            if fetch_failed and not clean_summary:
-                # No body and no summary — keep article eligible for a later run
+            if transient_fetch_failed and not clean_summary:
+                # Transient body fetch with no fallback — keep eligible for a later run
                 raise TransientHTTPError(
                     f"no article body after retries and empty RSS summary: {article['url']}"
                 )
@@ -739,11 +800,17 @@ def _image_fallback_words(query: str) -> list[str]:
     return [word for _, word in ranked[:2]]
 
 
-def _ddg_search_accessible_image(
+def _ddg_search_accessible_images(
     query: str,
     exclude: set[str],
-) -> str | None:
-    """Run one DDG image search; return first accessible URL not in exclude."""
+    count: int = 1,
+) -> list[str]:
+    """
+    Run one DDG image search; return up to `count` distinct accessible URLs
+    not in exclude (earliest results preferred).
+    """
+    if count <= 0:
+        return []
     search_url = "https://duckduckgo.com/"
     r = httpx.get(search_url, params={"q": query}, timeout=10, headers={
         "User-Agent": "Mozilla/5.0 (compatible; Xetarev-Agent/1.0)"
@@ -763,20 +830,35 @@ def _ddg_search_accessible_image(
     })
     results = r2.json().get("results", [])
     candidates: list[str] = []
+    seen_local: set[str] = set(exclude)
     for result in results:
         image = result.get("image", "")
-        if not image or image in exclude:
+        if not image or image in seen_local:
             continue
+        seen_local.add(image)
         candidates.append(image)
-    # HEAD-check candidates in parallel batches; earliest accessible wins
+    found: list[str] = []
     batch_size = 6
     for i in range(0, len(candidates), batch_size):
+        if len(found) >= count:
+            break
         batch = candidates[i : i + batch_size]
         access = check_images_accessible(batch)
         for image in batch:
             if access.get(image):
-                return image
-    return None
+                found.append(image)
+                if len(found) >= count:
+                    break
+    return found
+
+
+def _ddg_search_accessible_image(
+    query: str,
+    exclude: set[str],
+) -> str | None:
+    """Run one DDG image search; return first accessible URL not in exclude."""
+    found = _ddg_search_accessible_images(query, exclude, count=1)
+    return found[0] if found else None
 
 
 def find_image_url(
@@ -794,41 +876,61 @@ def find_image_url(
     fallbacks drawn from the query (most relevant word, then a different one).
     Returns None only if all three attempts come back empty.
     """
-    exclude = exclude_urls or set()
+    found = find_image_urls(
+        query,
+        count=1,
+        exclude_urls=exclude_urls,
+        dry_run=dry_run,
+        dry_label=dry_label,
+    )
+    return found[0] if found else None
+
+
+def find_image_urls(
+    query: str,
+    *,
+    count: int = 1,
+    exclude_urls: set[str] | None = None,
+    dry_run: bool = False,
+    dry_label: str = "Image search",
+) -> list[str]:
+    """
+    Search DuckDuckGo Images for up to `count` distinct accessible URLs
+    from a single query attempt chain (original + fallbacks).
+    """
+    exclude = set(exclude_urls or set())
     fallback_words = _image_fallback_words(query)
     original = (query or "").strip()
     attempts: list[tuple[str, str]] = [("original", original)]
     original_lower = original.lower()
     for i, word in enumerate(fallback_words):
-        # Skip fallbacks that duplicate the original query
         if word.lower() == original_lower:
             continue
         attempts.append((f"fallback-{i + 1}", word))
     attempts = [(label, q) for label, q in attempts if q]
     attempts = attempts[:3]
 
+    collected: list[str] = []
     for attempt_idx, (label, attempt_query) in enumerate(attempts, start=1):
+        if len(collected) >= count:
+            break
+        need = count - len(collected)
         try:
-            image = _ddg_search_accessible_image(attempt_query, exclude)
-            if image:
-                log.info(
-                    f"DDG image found (accessible) on {label} "
-                    f"attempt {attempt_idx}/{len(attempts)} "
-                    f"query={attempt_query!r}: {image[:80]}"
-                )
-                if dry_run:
-                    dry_print(
-                        dry_label,
-                        f"URL: {image}\n"
-                        f"Accessibility check: PASSED\n"
-                        f"Attempt: {attempt_idx}/{len(attempts)} ({label})\n"
-                        f"Query: {attempt_query}",
-                    )
-                return image
-            log.info(
-                f"DDG image search returned no accessible results on {label} "
-                f"attempt {attempt_idx}/{len(attempts)} query={attempt_query!r}"
+            found = _ddg_search_accessible_images(
+                attempt_query, exclude | set(collected), count=need
             )
+            if found:
+                log.info(
+                    f"DDG image(s) found (accessible) on {label} "
+                    f"attempt {attempt_idx}/{len(attempts)} "
+                    f"query={attempt_query!r}: {len(found)} url(s)"
+                )
+                collected.extend(found)
+            else:
+                log.info(
+                    f"DDG image search returned no accessible results on {label} "
+                    f"attempt {attempt_idx}/{len(attempts)} query={attempt_query!r}"
+                )
         except Exception as e:
             log.warning(
                 f"DDG image search failed on {label} "
@@ -837,13 +939,21 @@ def find_image_url(
             )
 
     if dry_run:
-        dry_print(
-            dry_label,
-            "URL: (none)\n"
-            "Accessibility check: N/A — no accessible DDG result "
-            f"after {len(attempts)} attempt(s)",
-        )
-    return None
+        if collected:
+            dry_print(
+                dry_label,
+                f"URLs ({len(collected)}): "
+                + ", ".join(u[:60] for u in collected)
+                + "\nAccessibility check: PASSED",
+            )
+        else:
+            dry_print(
+                dry_label,
+                "URL: (none)\n"
+                "Accessibility check: N/A — no accessible DDG result "
+                f"after {len(attempts)} attempt(s)",
+            )
+    return collected[:count]
 
 
 def resolve_featured_and_inline_images(
@@ -852,65 +962,61 @@ def resolve_featured_and_inline_images(
     dry_run: bool = False,
 ) -> tuple[str | None, str | None]:
     """
-    Resolve featured + inline image URLs concurrently.
+    Resolve featured + inline image URLs without duplicate DDG work.
 
     Featured prefers an accessible RSS feed image, else DDG.
-    Inline is always DDG and must differ from featured when both exist.
+    When a feed image exists, its HEAD check overlaps a single DDG pass for
+    up to two alternate URLs. When both slots need DDG, that one pass supplies both.
     """
-
-    def _featured() -> tuple[str | None, bool | None]:
-        """Return (url, feed_accessible_or_None_if_no_feed_image)."""
-        if feed_image:
-            accessible = is_image_accessible(feed_image)
-            if accessible:
-                log.info(f"Using RSS feed image for featured: {feed_image[:80]}")
-                return feed_image, True
-            log.info("RSS feed image present but not accessible; falling back to DDG")
-            url = find_image_url(
+    if feed_image:
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            fut_acc = pool.submit(is_image_accessible, feed_image)
+            fut_ddg = pool.submit(
+                find_image_urls,
                 image_query,
+                count=2,
+                exclude_urls={feed_image},
                 dry_run=dry_run,
-                dry_label="Featured image (DDG)",
+                dry_label="DDG images (alongside RSS check)",
             )
-            return url, False
-        url = find_image_url(
-            image_query,
-            dry_run=dry_run,
-            dry_label="Featured image (DDG)",
-        )
-        return url, None
+            feed_accessible = fut_acc.result()
+            ddg_urls = fut_ddg.result()
+        if dry_run:
+            dry_print(
+                "Featured image (from RSS)",
+                f"URL: {feed_image}\n"
+                f"Accessibility check: "
+                f"{'PASSED' if feed_accessible else 'FAILED'}",
+            )
+        if feed_accessible:
+            log.info(f"Using RSS feed image for featured: {feed_image[:80]}")
+            inline = ddg_urls[0] if ddg_urls else None
+            if inline:
+                log.info(f"DDG inline image: {inline[:80]}")
+            return feed_image, inline
+        log.info("RSS feed image present but not accessible; using DDG pair")
+        featured = ddg_urls[0] if ddg_urls else None
+        inline = ddg_urls[1] if len(ddg_urls) > 1 else None
+        if featured:
+            log.info(f"DDG featured image: {featured[:80]}")
+        if inline:
+            log.info(f"DDG inline image: {inline[:80]}")
+        return featured, inline
 
-    def _inline(exclude: set[str] | None = None) -> str | None:
-        return find_image_url(
-            image_query,
-            exclude_urls=exclude,
-            dry_run=dry_run,
-            dry_label="Inline DDG image",
-        )
-
-    with ThreadPoolExecutor(max_workers=2) as pool:
-        fut_featured = pool.submit(_featured)
-        # Start inline without exclude in parallel; collision fixed below.
-        fut_inline = pool.submit(_inline, None)
-        featured_image_url, feed_accessible = fut_featured.result()
-        inline_image_url = fut_inline.result()
-
-    if dry_run and feed_image is not None:
-        dry_print(
-            "Featured image (from RSS)",
-            f"URL: {feed_image}\n"
-            f"Accessibility check: "
-            f"{'PASSED' if feed_accessible else 'FAILED'}",
-        )
-
-    if (
-        featured_image_url
-        and inline_image_url
-        and inline_image_url == featured_image_url
-    ):
-        log.info("Inline image matched featured; searching again with exclude")
-        inline_image_url = _inline({featured_image_url})
-
-    return featured_image_url, inline_image_url
+    # No feed image — one DDG pass for two distinct URLs
+    urls = find_image_urls(
+        image_query,
+        count=2,
+        dry_run=dry_run,
+        dry_label="Featured + inline images (DDG)",
+    )
+    featured = urls[0] if urls else None
+    inline = urls[1] if len(urls) > 1 else None
+    if featured:
+        log.info(f"DDG featured image: {featured[:80]}")
+    if inline:
+        log.info(f"DDG inline image: {inline[:80]}")
+    return featured, inline
 
 
 # ─── Gemini content generation ────────────────────────────────────────────────
@@ -994,6 +1100,14 @@ def gemini_generate_content(client, *, model: str, contents, config, label: str)
     return call_with_http_retries(_do, label=label)
 
 
+def _gemini_json_config(max_output_tokens: int) -> types.GenerateContentConfig:
+    """JSON/text generation config with automatic function calling disabled."""
+    return types.GenerateContentConfig(
+        max_output_tokens=max_output_tokens,
+        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+    )
+
+
 def _strip_json_fences(raw: str) -> str:
     """Strip markdown code fences if Gemini adds them despite instructions."""
     raw = re.sub(r"^```json\s*", "", raw)
@@ -1010,8 +1124,9 @@ def title_relevance_check(article: dict, dry_run: bool = False) -> bool | None:
     """
     client = genai.Client(api_key=GEMINI_API_KEY)
     prompt = f"""
-{BRAND_CONTEXT}
-Your task: Decide whether this news article is a strong fit for the Xetarev Inlight blog.
+Your task: Decide whether this news article is a strong fit for the Xetarev Inlight blog
+(an indie tech company blog covering software, AI, startups, developer tools, cybersecurity,
+and indie building).
 Use ONLY the title and source name — do not assume article body content.
 Source article title: {article['title']}
 Source: {article['source']}
@@ -1029,7 +1144,7 @@ Respond ONLY with valid JSON, no markdown fences, no extra text:
                 client,
                 model=model_name,
                 contents=prompt,
-                config=types.GenerateContentConfig(max_output_tokens=32),
+                config=_gemini_json_config(32),
                 label=f"Gemini title check ({model_name})",
             )
             raw = _strip_json_fences(response.text.strip())
@@ -1125,7 +1240,7 @@ Respond ONLY with valid JSON, no markdown fences, no extra text. Format:
                 client,
                 model=model_name,
                 contents=prompt,
-                config=types.GenerateContentConfig(max_output_tokens=1000),
+                config=_gemini_json_config(1000),
                 label=f"Gemini generate_post ({model_name})",
             )
             raw = response.text.strip()
@@ -1600,7 +1715,7 @@ Respond ONLY with valid JSON, no markdown fences, no extra text:
                 client,
                 model=model_name,
                 contents=prompt,
-                config=types.GenerateContentConfig(max_output_tokens=1000),
+                config=_gemini_json_config(1000),
                 label=f"{label} ({model_name})",
             )
             raw = response.text.strip()
@@ -2110,21 +2225,24 @@ def main(dry_run: bool = False):
                     "published",
                 )
 
-            # 4. Featured + inline images concurrently (independent HTTP roundtrips)
+            # 4. Featured/inline images + humanize/audit in parallel (independent work)
             image_query = " ".join(generated.get("keywords", [])[:3]) or article["title"][:40]
-            featured_image_url, inline_image_url = resolve_featured_and_inline_images(
-                image_query,
-                article.get("image"),
-                dry_run=dry_run,
-            )
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                fut_imgs = pool.submit(
+                    resolve_featured_and_inline_images,
+                    image_query,
+                    article.get("image"),
+                    dry_run,
+                )
+                fut_human = pool.submit(
+                    humanize_and_audit_paragraphs,
+                    generated.get("paragraphs", []),
+                    dry_run,
+                )
+                featured_image_url, inline_image_url = fut_imgs.result()
+                generated["paragraphs"] = fut_human.result()
 
-            # 3b. Humanize + audit generated paragraphs (before Lexical build)
-            generated["paragraphs"] = humanize_and_audit_paragraphs(
-                generated.get("paragraphs", []),
-                dry_run=dry_run,
-            )
-
-            # 4. Build Lexical content JSON
+            # 5. Build Lexical content JSON
             content_json = build_lexical_content(
                 paragraphs=generated.get("paragraphs", []),
                 image_url=inline_image_url,
@@ -2154,7 +2272,7 @@ def main(dry_run: bool = False):
                     success = post_to_payload(
                         generated, content_json, featured_image_url, jwt
                     )
-                except TransientHTTPError as e:
+                except (TransientHTTPError, NonRetryableHTTPError) as e:
                     log.error(
                         f"Payload publish failed after retries — leaving unseen: {e}"
                     )
