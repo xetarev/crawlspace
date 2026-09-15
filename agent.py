@@ -1,16 +1,18 @@
 """
-Xetarev SEO News Agent
+Xetarev Crawlspace
 -----------------------
 Runs on GitHub Actions on a cron schedule.
 Pipeline:
-  1. Poll RSS feeds for new articles
+  1. Poll RSS feeds for new articles (weighted by historical Gemini skip rates)
   2. Filter unseen articles using seen_articles.json
-  3. Fetch full article text via trafilatura
-  4. Prefer featured image from RSS feed data; DuckDuckGo as fallback (skip if none)
-  5. Generate SEO post via Gemini (title, slug, excerpt, body) — or skip if off-topic
-  6. Build Payload Lexical JSON content structure
-  7. POST to Payload CMS REST API as published
-  8. Commit updated seen_articles.json back to repo
+  3. Title-first relevance gate via Gemini (title + source only; skip off-topic)
+  4. Fetch full article text via trafilatura (only if relevant)
+  5. Prefer featured image from RSS feed data; DuckDuckGo as fallback (skip if none)
+  6. Generate SEO post via Gemini (title, slug, excerpt, body)
+  7. Build Payload Lexical JSON content structure
+  8. POST to Payload CMS REST API as published
+  9. Update per-feed skip/publish stats in feed_quality.json
+ 10. Commit updated seen_articles.json and feed_quality.json back to repo
 """
 import os
 import json
@@ -21,6 +23,8 @@ import logging
 import random
 import re
 import argparse
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import httpx
 import feedparser
 import trafilatura
@@ -42,14 +46,18 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 # ─── Dry-run diagnostics (stdout, separate from normal logging) ───────────────
+_dry_print_lock = threading.Lock()
+
+
 def dry_print(label: str, content: str = "") -> None:
     """Print clearly labeled dry-run output so it stands out in the terminal."""
     sep = "─" * 72
-    print(f"\n{sep}")
-    print(f"[DRY-RUN] {label}")
-    print(sep)
-    if content:
-        print(content)
+    with _dry_print_lock:
+        print(f"\n{sep}")
+        print(f"[DRY-RUN] {label}")
+        print(sep)
+        if content:
+            print(content)
 # ─── Config from env / GitHub Actions Secrets ───────────────────────────────
 GEMINI_API_KEY    = os.environ["GEMINI_API_KEY"]
 PAYLOAD_API_URL   = os.environ["PAYLOAD_API_URL"]   # e.g. https://your-app.vercel.app/api/inlight-posts
@@ -166,10 +174,24 @@ RSS_FEEDS = [
 ARTICLES_PER_RUN   = 4    # articles fetched per batch
 MIN_PUBLISH        = ARTICLES_PER_RUN // 2  # publish at least 50% of batch size per run
 STATE_FILE         = "seen_articles.json"
+FEED_STATS_FILE    = "feed_quality.json"
+# Soft-deprioritize feeds once they have enough Gemini topic decisions.
+# Weight never hits zero — chronically weak feeds stay eligible, just less often.
+FEED_STATS_MIN_SAMPLES = 3
+FEED_STATS_MIN_WEIGHT  = 0.15
 MIN_SUMMARY_LENGTH = 300   # chars — below this we try trafilatura for full text
 # Stage 4 AI-audit: scores at or above this are not "Likely Human" enough to post as-is
 HUMAN_SCORE_THRESHOLD = 35
 MAX_HUMANIZE_RETRIES = 2
+# Transient HTTP retries (timeouts, connection errors, 5xx)
+HTTP_MAX_ATTEMPTS = 3
+# Payload slug-check GET + publish POST: higher ceiling — a lost POST drops the article.
+PAYLOAD_HTTP_MAX_ATTEMPTS = 5
+# Distinct ladders: short for transient faults; long for rate limits (429).
+HTTP_TRANSIENT_BACKOFF_SEC = (1.0, 2.0, 4.0)
+HTTP_RATE_LIMIT_BACKOFF_SEC = (15.0, 30.0, 60.0)
+# Uniform jitter as a fraction of the chosen base delay (±), all retry cases.
+HTTP_RETRY_JITTER_FRAC = 0.25
 MODEL_CHAIN = [
     "gemini-3.5-flash-lite",
     "gemini-3.1-flash-lite",
@@ -177,6 +199,197 @@ MODEL_CHAIN = [
     "gemini-3.6-flash",
     "gemini-3.7-flash",
 ]
+# ─── Transient HTTP retries ───────────────────────────────────────────────────
+class TransientHTTPError(Exception):
+    """Timeout, connection error, or retryable HTTP status (may carry 429 metadata)."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        status_code: int | None = None,
+        retry_after: float | None = None,
+    ):
+        super().__init__(message)
+        self.status_code = status_code
+        self.retry_after = retry_after
+
+
+def _is_retryable_http_status(status_code: int) -> bool:
+    return status_code in (408, 425, 429) or status_code >= 500
+
+
+def _is_rate_limit_status(status_code: int | None) -> bool:
+    return status_code == 429
+
+
+def _parse_retry_after_seconds(value: str | None) -> float | None:
+    """Parse Retry-After as delta-seconds or HTTP-date; None if missing/invalid."""
+    if not value:
+        return None
+    raw = value.strip()
+    if not raw:
+        return None
+    try:
+        return max(0.0, float(raw))
+    except ValueError:
+        pass
+    try:
+        from email.utils import parsedate_to_datetime
+
+        dt = parsedate_to_datetime(raw)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return max(0.0, (dt - datetime.now(timezone.utc)).total_seconds())
+    except (TypeError, ValueError, OverflowError, IndexError):
+        return None
+
+
+def _jittered_delay(base_sec: float) -> float:
+    """Apply ±HTTP_RETRY_JITTER_FRAC uniform jitter so concurrent retries desync."""
+    if base_sec <= 0:
+        return 0.0
+    span = base_sec * HTTP_RETRY_JITTER_FRAC
+    return max(0.0, base_sec + random.uniform(-span, span))
+
+
+def _backoff_delay(
+    attempt: int,
+    *,
+    status_code: int | None = None,
+    retry_after: float | None = None,
+) -> float:
+    """
+    Seconds to wait after a failed attempt (1-based).
+
+    Prefer Retry-After when the server sent one; otherwise use the rate-limit
+    ladder (15/30/60) for 429 and the short transient ladder (1/2/4) for
+    timeouts / 5xx / other retryable faults. Jitter is applied in every case.
+    """
+    if retry_after is not None:
+        return _jittered_delay(retry_after)
+    ladder = (
+        HTTP_RATE_LIMIT_BACKOFF_SEC
+        if _is_rate_limit_status(status_code)
+        else HTTP_TRANSIENT_BACKOFF_SEC
+    )
+    idx = min(max(attempt, 1) - 1, len(ladder) - 1)
+    return _jittered_delay(ladder[idx])
+
+
+def call_with_http_retries(operation, *, label: str, max_attempts: int = HTTP_MAX_ATTEMPTS):
+    """
+    Run operation() with exponential backoff on TransientHTTPError.
+    429 uses a longer ladder than timeouts/5xx; Retry-After wins when present.
+    Non-transient exceptions propagate immediately.
+    """
+    last_error: Exception | None = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            return operation()
+        except TransientHTTPError as e:
+            last_error = e
+            if attempt >= max_attempts:
+                break
+            delay = _backoff_delay(
+                attempt,
+                status_code=e.status_code,
+                retry_after=e.retry_after,
+            )
+            kind = (
+                "rate limit (429)"
+                if _is_rate_limit_status(e.status_code)
+                else "transient failure"
+            )
+            retry_after_note = (
+                f", Retry-After={e.retry_after:.1f}s" if e.retry_after is not None else ""
+            )
+            log.warning(
+                f"{label}: {kind} "
+                f"(attempt {attempt}/{max_attempts}): {e}{retry_after_note}; "
+                f"retrying in {delay:.1f}s"
+            )
+            time.sleep(delay)
+    raise TransientHTTPError(
+        f"{label}: exhausted {max_attempts} attempts — {last_error}",
+        status_code=getattr(last_error, "status_code", None),
+        retry_after=getattr(last_error, "retry_after", None),
+    ) from last_error
+
+
+def http_request(
+    method: str,
+    url: str,
+    *,
+    label: str,
+    retryable_statuses: bool = True,
+    max_attempts: int = HTTP_MAX_ATTEMPTS,
+    **kwargs,
+) -> httpx.Response:
+    """httpx.request with retries on timeouts, network errors, and 5xx/429."""
+
+    def _do():
+        try:
+            response = httpx.request(method, url, **kwargs)
+        except (
+            httpx.TimeoutException,
+            httpx.NetworkError,
+            httpx.RemoteProtocolError,
+        ) as e:
+            raise TransientHTTPError(str(e)) from e
+        if retryable_statuses and _is_retryable_http_status(response.status_code):
+            retry_after = _parse_retry_after_seconds(
+                response.headers.get("Retry-After")
+            )
+            raise TransientHTTPError(
+                f"HTTP {response.status_code}",
+                status_code=response.status_code,
+                retry_after=retry_after,
+            )
+        return response
+
+    return call_with_http_retries(_do, label=label, max_attempts=max_attempts)
+
+
+def parse_feed_with_retries(feed_url: str):
+    """feedparser.parse with retries on transient HTTP / network failures."""
+
+    def _do():
+        feed = feedparser.parse(feed_url)
+        status = getattr(feed, "status", None)
+        if isinstance(status, int) and _is_retryable_http_status(status):
+            raise TransientHTTPError(
+                f"feed HTTP {status}",
+                status_code=status,
+            )
+        # Network failures often surface as bozo + empty entries
+        if getattr(feed, "bozo", False) and not getattr(feed, "entries", None):
+            bozo_exc = getattr(feed, "bozo_exception", None)
+            if bozo_exc is not None:
+                raise TransientHTTPError(str(bozo_exc)) from bozo_exc
+        return feed
+
+    return call_with_http_retries(_do, label=f"RSS fetch {feed_url}")
+
+
+def fetch_url_with_retries(url: str) -> str:
+    """
+    trafilatura.fetch_url with retries.
+    Raises TransientHTTPError when all attempts return nothing or error.
+    """
+
+    def _do():
+        try:
+            downloaded = trafilatura.fetch_url(url)
+        except Exception as e:
+            raise TransientHTTPError(str(e)) from e
+        if not downloaded:
+            raise TransientHTTPError("empty response / fetch failed")
+        return downloaded
+
+    return call_with_http_retries(_do, label=f"trafilatura {url}")
+
+
 # ─── Xetarev brand context injected into every Gemini prompt ────────────────
 BRAND_CONTEXT = """
 You write for Xetarev Inlight — an indie tech company's blog.
@@ -203,6 +416,56 @@ def save_seen(seen: set) -> None:
     with open(STATE_FILE, "w") as f:
         json.dump(sorted(list(seen)), f, indent=2)
     log.info(f"Saved {len(seen)} seen article IDs to {STATE_FILE}")
+def load_feed_stats() -> dict:
+    """Load per-feed Gemini skip/publish counters from disk."""
+    try:
+        with open(FEED_STATS_FILE, "r") as f:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+def save_feed_stats(stats: dict) -> None:
+    """Persist per-feed quality counters to disk."""
+    with open(FEED_STATS_FILE, "w") as f:
+        json.dump(stats, f, indent=2, sort_keys=True)
+    log.info(f"Saved feed quality stats for {len(stats)} feed(s) to {FEED_STATS_FILE}")
+def feed_selection_weight(stats_entry: dict | None) -> float:
+    """
+    Selection weight from historical Gemini topic decisions.
+    Neutral (1.0) until FEED_STATS_MIN_SAMPLES decisions; then inverse skip rate
+    floored at FEED_STATS_MIN_WEIGHT so feeds are never removed entirely.
+    """
+    if not stats_entry:
+        return 1.0
+    skipped = int(stats_entry.get("skipped", 0) or 0)
+    published = int(stats_entry.get("published", 0) or 0)
+    total = skipped + published
+    if total < FEED_STATS_MIN_SAMPLES:
+        return 1.0
+    skip_rate = skipped / total
+    return max(FEED_STATS_MIN_WEIGHT, 1.0 - skip_rate)
+def record_feed_outcome(
+    stats: dict,
+    feed_url: str,
+    source_name: str,
+    outcome: str,
+) -> None:
+    """
+    Increment skipped or published counter for a feed URL.
+
+    Content decisions only:
+      - "skipped" — title-gate rejection (or Gemini {"skip": true})
+      - "published" — generate_post returned a valid on-topic post
+    Never call this for Payload/CMS infrastructure outcomes.
+    """
+    if not feed_url or outcome not in ("skipped", "published"):
+        return
+    entry = stats.setdefault(
+        feed_url,
+        {"name": source_name, "skipped": 0, "published": 0},
+    )
+    entry["name"] = source_name or entry.get("name") or feed_url
+    entry[outcome] = int(entry.get(outcome, 0) or 0) + 1
 def article_id(entry) -> str:
     """Stable unique ID for a feed entry — prefer guid, fallback to URL hash."""
     raw = getattr(entry, "id", None) or getattr(entry, "link", "")
@@ -262,12 +525,39 @@ def extract_feed_image(entry) -> str | None:
         if rel == "enclosure" and (link_type.startswith("image/") or _looks_like_image_url(url)):
             return url
     return None
-def fetch_new_articles(seen: set, used_feeds: set | None = None, dry_run: bool = False) -> list[dict]:
+def _weighted_sample_feeds(
+    available: list[tuple[str, str]],
+    feed_stats: dict,
+    k: int,
+) -> list[tuple[str, str]]:
     """
-    Shuffle unused feeds, poll up to ARTICLES_PER_RUN of them, return one unseen
-    article per feed. used_feeds tracks feed URLs already polled this run.
+    Sample up to k feeds without replacement, biased by feed_selection_weight.
+    Low-quality feeds remain in the pool at FEED_STATS_MIN_WEIGHT.
+    """
+    if not available or k <= 0:
+        return []
+    pool = list(available)
+    selected: list[tuple[str, str]] = []
+    for _ in range(min(k, len(pool))):
+        weights = [feed_selection_weight(feed_stats.get(url)) for _, url in pool]
+        # random.choices requires positive weights; guard against bad persisted data
+        weights = [w if w > 0 else FEED_STATS_MIN_WEIGHT for w in weights]
+        idx = random.choices(range(len(pool)), weights=weights, k=1)[0]
+        selected.append(pool.pop(idx))
+    return selected
+def fetch_new_articles(
+    seen: set,
+    used_feeds: set | None = None,
+    feed_stats: dict | None = None,
+    dry_run: bool = False,
+) -> list[dict]:
+    """
+    Weight-sample unused feeds by historical Gemini skip rates, poll up to
+    ARTICLES_PER_RUN of them, return one unseen article per feed.
+    used_feeds tracks feed URLs already polled this run.
     """
     used = used_feeds if used_feeds is not None else set()
+    stats = feed_stats if feed_stats is not None else {}
     available = [(name, url) for name, url in RSS_FEEDS if url not in used]
     if not available:
         log.info("No unused feeds left to poll")
@@ -275,32 +565,44 @@ def fetch_new_articles(seen: set, used_feeds: set | None = None, dry_run: bool =
             dry_print("Feed selection", "No unused feeds left to poll")
         return []
 
-    random.shuffle(available)
-    selected = available[:ARTICLES_PER_RUN]
-    log.info(f"Selected {len(selected)} feeds this batch: {[name for name, _ in selected]}")
+    selected = _weighted_sample_feeds(available, stats, ARTICLES_PER_RUN)
+    weight_notes = []
+    for name, url in selected:
+        w = feed_selection_weight(stats.get(url))
+        entry = stats.get(url) or {}
+        skipped = int(entry.get("skipped", 0) or 0)
+        published = int(entry.get("published", 0) or 0)
+        weight_notes.append(f"{name} (w={w:.2f}, skip={skipped}, pub={published})")
+    log.info(f"Selected {len(selected)} feeds this batch: {weight_notes}")
     if dry_run:
-        lines = [f"  - {name} ({url})" for name, url in selected]
+        lines = [
+            f"  - {name} ({url}) weight={feed_selection_weight(stats.get(url)):.2f}"
+            for name, url in selected
+        ]
         dry_print("Feeds selected this batch", "\n".join(lines) if lines else "(none)")
 
     candidates = []
     for source_name, feed_url in selected:
         used.add(feed_url)
         try:
-            feed = feedparser.parse(feed_url)
+            feed = parse_feed_with_retries(feed_url)
             for entry in feed.entries:
                 uid = article_id(entry)
                 if uid in seen:
                     continue
                 feed_image = extract_feed_image(entry)
                 candidates.append({
-                    "id":      uid,
-                    "source":  source_name,
-                    "title":   entry.get("title", "").strip(),
-                    "url":     entry.get("link", "").strip(),
-                    "summary": entry.get("summary", "").strip(),
-                    "image":   feed_image,
+                    "id":       uid,
+                    "source":   source_name,
+                    "feed_url": feed_url,
+                    "title":    entry.get("title", "").strip(),
+                    "url":      entry.get("link", "").strip(),
+                    "summary":  entry.get("summary", "").strip(),
+                    "image":    feed_image,
                 })
                 break  # one candidate per feed
+        except TransientHTTPError as e:
+            log.warning(f"Failed to fetch feed after retries {feed_url}: {e}")
         except Exception as e:
             log.warning(f"Failed to fetch feed {feed_url}: {e}")
 
@@ -310,8 +612,11 @@ def fetch_new_articles(seen: set, used_feeds: set | None = None, dry_run: bool =
 def get_article_text(article: dict, dry_run: bool = False) -> str:
     """
     Return the best available text for an article.
-    Uses RSS summary if long enough, otherwise fetches full text via trafilatura.
+    Uses RSS summary if long enough, otherwise fetches full text via trafilatura
+    (with exponential-backoff retries).
     Falls back to summary if trafilatura fails or is blocked.
+    Raises TransientHTTPError when the body HTTP fetch fails after retries and
+    there is no usable RSS summary fallback (caller must not mark the article seen).
     """
     summary = article.get("summary", "")
     # Strip HTML tags from summary if present
@@ -322,21 +627,27 @@ def get_article_text(article: dict, dry_run: bool = False) -> str:
     else:
         log.info(f"Summary too short ({len(clean_summary)} chars), fetching full text: {article['url']}")
         text = None
+        fetch_failed = False
         try:
-            downloaded = trafilatura.fetch_url(article["url"])
-            if downloaded:
-                extracted = trafilatura.extract(
-                    downloaded,
-                    include_formatting=False,
-                    include_comments=False,
-                    no_fallback=False,
-                )
-                if extracted and len(extracted) > len(clean_summary):
-                    log.info(f"trafilatura extracted {len(extracted)} chars")
-                    text = extracted[:4000]  # cap to avoid burning Gemini tokens
-        except Exception as e:
-            log.warning(f"trafilatura failed for {article['url']}: {e}")
+            downloaded = fetch_url_with_retries(article["url"])
+            extracted = trafilatura.extract(
+                downloaded,
+                include_formatting=False,
+                include_comments=False,
+                no_fallback=False,
+            )
+            if extracted and len(extracted) > len(clean_summary):
+                log.info(f"trafilatura extracted {len(extracted)} chars")
+                text = extracted[:4000]  # cap to avoid burning Gemini tokens
+        except TransientHTTPError as e:
+            fetch_failed = True
+            log.warning(f"trafilatura failed after retries for {article['url']}: {e}")
         if text is None:
+            if fetch_failed and not clean_summary:
+                # No body and no summary — keep article eligible for a later run
+                raise TransientHTTPError(
+                    f"no article body after retries and empty RSS summary: {article['url']}"
+                )
             log.info("Falling back to RSS summary")
             text = clean_summary or article.get("title", "")
     if dry_run:
@@ -374,6 +685,36 @@ def is_image_accessible(url: str) -> bool:
         return r.status_code == 200
     except Exception:
         return False
+
+
+def check_images_accessible(urls: list[str]) -> dict[str, bool]:
+    """
+    HEAD-check multiple image URLs concurrently.
+    Returns a map of url -> accessible for each distinct non-empty URL.
+    """
+    unique: list[str] = []
+    seen: set[str] = set()
+    for url in urls:
+        if not url or url in seen:
+            continue
+        seen.add(url)
+        unique.append(url)
+    if not unique:
+        return {}
+    if len(unique) == 1:
+        return {unique[0]: is_image_accessible(unique[0])}
+
+    results: dict[str, bool] = {}
+    workers = min(8, len(unique))
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {pool.submit(is_image_accessible, url): url for url in unique}
+        for fut in as_completed(futures):
+            url = futures[fut]
+            try:
+                results[url] = fut.result()
+            except Exception:
+                results[url] = False
+    return results
 
 
 def _image_fallback_words(query: str) -> list[str]:
@@ -418,12 +759,20 @@ def _ddg_search_accessible_image(
         "Referer": "https://duckduckgo.com/",
     })
     results = r2.json().get("results", [])
+    candidates: list[str] = []
     for result in results:
         image = result.get("image", "")
         if not image or image in exclude:
             continue
-        if is_image_accessible(image):
-            return image
+        candidates.append(image)
+    # HEAD-check candidates in parallel batches; earliest accessible wins
+    batch_size = 6
+    for i in range(0, len(candidates), batch_size):
+        batch = candidates[i : i + batch_size]
+        access = check_images_accessible(batch)
+        for image in batch:
+            if access.get(image):
+                return image
     return None
 
 
@@ -494,6 +843,73 @@ def find_image_url(
     return None
 
 
+def resolve_featured_and_inline_images(
+    image_query: str,
+    feed_image: str | None,
+    dry_run: bool = False,
+) -> tuple[str | None, str | None]:
+    """
+    Resolve featured + inline image URLs concurrently.
+
+    Featured prefers an accessible RSS feed image, else DDG.
+    Inline is always DDG and must differ from featured when both exist.
+    """
+
+    def _featured() -> tuple[str | None, bool | None]:
+        """Return (url, feed_accessible_or_None_if_no_feed_image)."""
+        if feed_image:
+            accessible = is_image_accessible(feed_image)
+            if accessible:
+                log.info(f"Using RSS feed image for featured: {feed_image[:80]}")
+                return feed_image, True
+            log.info("RSS feed image present but not accessible; falling back to DDG")
+            url = find_image_url(
+                image_query,
+                dry_run=dry_run,
+                dry_label="Featured image (DDG)",
+            )
+            return url, False
+        url = find_image_url(
+            image_query,
+            dry_run=dry_run,
+            dry_label="Featured image (DDG)",
+        )
+        return url, None
+
+    def _inline(exclude: set[str] | None = None) -> str | None:
+        return find_image_url(
+            image_query,
+            exclude_urls=exclude,
+            dry_run=dry_run,
+            dry_label="Inline DDG image",
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        fut_featured = pool.submit(_featured)
+        # Start inline without exclude in parallel; collision fixed below.
+        fut_inline = pool.submit(_inline, None)
+        featured_image_url, feed_accessible = fut_featured.result()
+        inline_image_url = fut_inline.result()
+
+    if dry_run and feed_image is not None:
+        dry_print(
+            "Featured image (from RSS)",
+            f"URL: {feed_image}\n"
+            f"Accessibility check: "
+            f"{'PASSED' if feed_accessible else 'FAILED'}",
+        )
+
+    if (
+        featured_image_url
+        and inline_image_url
+        and inline_image_url == featured_image_url
+    ):
+        log.info("Inline image matched featured; searching again with exclude")
+        inline_image_url = _inline({featured_image_url})
+
+    return featured_image_url, inline_image_url
+
+
 # ─── Gemini content generation ────────────────────────────────────────────────
 def _is_model_not_found(exc: Exception) -> bool:
     """True when the error indicates the model ID is missing / unavailable (try next)."""
@@ -508,13 +924,162 @@ def _is_model_not_found(exc: Exception) -> bool:
     if status in (404, "NOT_FOUND"):
         return True
     return False
+
+
+def _is_rate_limit_error(exc: Exception) -> bool:
+    """True for Gemini/API 429 / RESOURCE_EXHAUSTED rate-limit signals."""
+    code = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+    if code in (429, "429", "RESOURCE_EXHAUSTED"):
+        return True
+    status = getattr(exc, "status", None)
+    if status in (429, "429", "RESOURCE_EXHAUSTED"):
+        return True
+    msg = str(exc).lower()
+    return (
+        "429" in msg
+        or "resource_exhausted" in msg
+        or "resource exhausted" in msg
+        or "rate limit" in msg
+        or "rate-limit" in msg
+        or "too many requests" in msg
+    )
+
+
+def _retry_after_from_exception(exc: Exception) -> float | None:
+    """Best-effort Retry-After extraction from SDK / HTTP exceptions."""
+    candidates = [getattr(exc, "headers", None)]
+    response = getattr(exc, "response", None)
+    if response is not None:
+        candidates.append(getattr(response, "headers", None))
+    for headers in candidates:
+        if not headers:
+            continue
+        try:
+            value = headers.get("Retry-After") or headers.get("retry-after")
+        except (AttributeError, TypeError):
+            continue
+        if value is None:
+            continue
+        parsed = _parse_retry_after_seconds(str(value))
+        if parsed is not None:
+            return parsed
+    return None
+
+
+def gemini_generate_content(client, *, model: str, contents, config, label: str):
+    """
+    client.models.generate_content with 429-aware retries (15/30/60 + jitter,
+    Retry-After when present). Other errors propagate to the caller.
+    """
+
+    def _do():
+        try:
+            return client.models.generate_content(
+                model=model,
+                contents=contents,
+                config=config,
+            )
+        except Exception as e:
+            if _is_rate_limit_error(e):
+                raise TransientHTTPError(
+                    str(e),
+                    status_code=429,
+                    retry_after=_retry_after_from_exception(e),
+                ) from e
+            raise
+
+    return call_with_http_retries(_do, label=label)
+
+
+def _strip_json_fences(raw: str) -> str:
+    """Strip markdown code fences if Gemini adds them despite instructions."""
+    raw = re.sub(r"^```json\s*", "", raw)
+    raw = re.sub(r"^```\s*", "", raw)
+    raw = re.sub(r"\s*```$", "", raw)
+    return raw
+
+
+def title_relevance_check(article: dict, dry_run: bool = False) -> bool | None:
+    """
+    Lightweight Gemini gate using only title + source name.
+    Returns True if the article looks on-topic, False if off-topic (skip),
+    or None if the check fails.
+    """
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    prompt = f"""
+{BRAND_CONTEXT}
+Your task: Decide whether this news article is a strong fit for the Xetarev Inlight blog.
+Use ONLY the title and source name — do not assume article body content.
+Source article title: {article['title']}
+Source: {article['source']}
+Relevance criteria:
+- Strong fit for: technology, software, AI, startups, developer tools, cybersecurity, or indie building.
+- Not a fit: lifestyle fluff, unrelated politics, pure entertainment, education-for-teachers, generic vendor marketing, or other weak/tangential topics.
+Respond ONLY with valid JSON, no markdown fences, no extra text:
+- If it is a strong fit: {{"relevant": true}}
+- If it is not a strong fit: {{"skip": true}}
+"""
+    last_error = None
+    for model_name in MODEL_CHAIN:
+        try:
+            response = gemini_generate_content(
+                client,
+                model=model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(max_output_tokens=32),
+                label=f"Gemini title check ({model_name})",
+            )
+            raw = _strip_json_fences(response.text.strip())
+            if dry_run:
+                dry_print(
+                    "Title-first relevance check (raw Gemini response)",
+                    raw,
+                )
+            data = json.loads(raw)
+            if data.get("skip"):
+                log.info(
+                    f"Gemini ({model_name}) title-skip (off-topic): "
+                    f"{article['title'][:60]}"
+                )
+                return False
+            if data.get("relevant"):
+                log.info(
+                    f"Gemini ({model_name}) title-pass (on-topic): "
+                    f"{article['title'][:60]}"
+                )
+                return True
+            log.warning(
+                f"Gemini ({model_name}) title check returned unexpected JSON: {raw[:200]}"
+            )
+            return None
+        except json.JSONDecodeError as e:
+            log.error(
+                f"Gemini ({model_name}) title check invalid JSON: {e}\n"
+                f"Raw response: {raw[:300]}"
+            )
+            return None
+        except TransientHTTPError as e:
+            last_error = e
+            log.error(f"Gemini ({model_name}) rate-limited after retries: {e}")
+            return None
+        except Exception as e:
+            last_error = e
+            if _is_model_not_found(e):
+                log.warning(f"Model {model_name} not found (404), trying next: {e}")
+                continue
+            log.error(f"Gemini title check failed with {model_name}: {e}")
+            return None
+    log.error(f"All models in MODEL_CHAIN failed title check. Last error: {last_error}")
+    return None
+
+
 def generate_post(article: dict, body_text: str, dry_run: bool = False) -> dict | None:
     """
     Call Gemini to produce a structured JSON response with all post fields.
     Tries each model in MODEL_CHAIN until one succeeds.
     Returns a dict with: title, slug, excerpt, paragraphs (list of strings), keywords (list)
-    May return {"skip": true} when the source is off-topic.
     Returns None if generation fails.
+    Assumes the article already passed title_relevance_check.
     """
     client = genai.Client(api_key=GEMINI_API_KEY)
     prompt = f"""
@@ -526,11 +1091,7 @@ Article text:
 \"\"\"
 {body_text[:3000]}
 \"\"\"
-Relevance gate (do this first):
-- The source must be a strong fit for: technology, software, AI, startups, developer tools, cybersecurity, or indie building.
-- If it is not a strong fit, respond ONLY with: {{"skip": true}}
-- Do not write a post for weak or tangential topics (lifestyle fluff, unrelated politics, pure entertainment, education-for-teachers, generic vendor marketing, etc.).
-Instructions (only if relevant):
+Instructions:
 - Write a fresh, original post. Do NOT copy sentences from the source. Rewrite everything.
 - Length: 500-550 words across 4–6 paragraphs.
 - Voice: knowledgeable individual with a point of view. First person where natural. Direct opinions. Sharp, informed, human — not an AI content pipeline.
@@ -538,7 +1099,7 @@ Instructions (only if relevant):
 - SEO-optimized: use the main topic keyword naturally in the title and early in the body.
 - The excerpt should be 1–2 sentences, punchy, suitable for a feed preview.
 - Paragraph 3 or 4 should include [IMAGE] as a placeholder on its own line — this is where the inline image will be inserted.
-Respond ONLY with valid JSON, no markdown fences, no extra text. Format when writing a post:
+Respond ONLY with valid JSON, no markdown fences, no extra text. Format:
 {{
   "title": "...",
   "slug": "...",
@@ -556,10 +1117,12 @@ Respond ONLY with valid JSON, no markdown fences, no extra text. Format when wri
     last_error = None
     for model_name in MODEL_CHAIN:
         try:
-            response = client.models.generate_content(
+            response = gemini_generate_content(
+                client,
                 model=model_name,
                 contents=prompt,
                 config=types.GenerateContentConfig(max_output_tokens=1000),
+                label=f"Gemini generate_post ({model_name})",
             )
             raw = response.text.strip()
             if dry_run:
@@ -567,33 +1130,30 @@ Respond ONLY with valid JSON, no markdown fences, no extra text. Format when wri
                     "Raw Gemini response (before JSON parsing)",
                     f"chars: {len(raw)} (body omitted)",
                 )
-            # Strip markdown code fences if Gemini adds them despite instructions
-            raw = re.sub(r"^```json\s*", "", raw)
-            raw = re.sub(r"^```\s*", "", raw)
-            raw = re.sub(r"\s*```$", "", raw)
-            data = json.loads(raw)
-            if data.get("skip"):
-                log.info(f"Gemini ({model_name}) skipped article as off-topic: {article['title'][:60]}")
-            else:
-                log.info(f"Gemini ({model_name}) generated post: {data.get('title', '')[:60]}")
-                if dry_run:
-                    paragraphs = data.get("paragraphs") or []
-                    para_summary = "\n".join(
-                        f"  [{i}] {len(p)} chars"
-                        + (" [IMAGE]" if p.strip() == IMAGE_PLACEHOLDER else "")
-                        for i, p in enumerate(paragraphs, start=1)
-                    )
-                    dry_print(
-                        "Parsed post fields",
-                        f"title: {data.get('title', '')}\n"
-                        f"slug: {data.get('slug', '')}\n"
-                        f"excerpt: {data.get('excerpt', '')}\n"
-                        f"keywords: {data.get('keywords', [])}\n"
-                        f"paragraphs ({len(paragraphs)}) — body omitted:\n{para_summary}",
-                    )
+            data = json.loads(_strip_json_fences(raw))
+            log.info(f"Gemini ({model_name}) generated post: {data.get('title', '')[:60]}")
+            if dry_run:
+                paragraphs = data.get("paragraphs") or []
+                para_summary = "\n".join(
+                    f"  [{i}] {len(p)} chars"
+                    + (" [IMAGE]" if p.strip() == IMAGE_PLACEHOLDER else "")
+                    for i, p in enumerate(paragraphs, start=1)
+                )
+                dry_print(
+                    "Parsed post fields",
+                    f"title: {data.get('title', '')}\n"
+                    f"slug: {data.get('slug', '')}\n"
+                    f"excerpt: {data.get('excerpt', '')}\n"
+                    f"keywords: {data.get('keywords', [])}\n"
+                    f"paragraphs ({len(paragraphs)}) — body omitted:\n{para_summary}",
+                )
             return data
         except json.JSONDecodeError as e:
             log.error(f"Gemini ({model_name}) returned invalid JSON: {e}\nRaw response: {raw[:300]}")
+            return None
+        except TransientHTTPError as e:
+            last_error = e
+            log.error(f"Gemini ({model_name}) rate-limited after retries: {e}")
             return None
         except Exception as e:
             last_error = e
@@ -1026,10 +1586,12 @@ Respond ONLY with valid JSON, no markdown fences, no extra text:
     last_error = None
     for model_name in MODEL_CHAIN:
         try:
-            response = client.models.generate_content(
+            response = gemini_generate_content(
+                client,
                 model=model_name,
                 contents=prompt,
                 config=types.GenerateContentConfig(max_output_tokens=1000),
+                label=f"{label} ({model_name})",
             )
             raw = response.text.strip()
             if dry_run:
@@ -1063,6 +1625,10 @@ Respond ONLY with valid JSON, no markdown fences, no extra text:
             return [str(p) for p in new_paras]
         except json.JSONDecodeError as e:
             log.error(f"{label} ({model_name}) invalid JSON: {e}\nRaw: {raw[:300]}")
+            return None
+        except TransientHTTPError as e:
+            last_error = e
+            log.error(f"{label} ({model_name}) rate-limited after retries: {e}")
             return None
         except Exception as e:
             last_error = e
@@ -1280,22 +1846,33 @@ def build_lexical_content(
     }
 # ─── Payload REST API POST ────────────────────────────────────────────────────
 def get_payload_jwt() -> str | None:
-    """Log in to Payload and return a short-lived JWT."""
+    """Log in to Payload and return a short-lived JWT (retries transient failures)."""
     login_url = PAYLOAD_API_URL.replace("/api/inlight-posts", "/api/users/login")
     try:
-        r = httpx.post(login_url, json={
-            "email": os.environ["PAYLOAD_EMAIL"],
-            "password": os.environ["PAYLOAD_PASSWORD"],
-        }, timeout=10)
+        r = http_request(
+            "POST",
+            login_url,
+            label="Payload login",
+            json={
+                "email": os.environ["PAYLOAD_EMAIL"],
+                "password": os.environ["PAYLOAD_PASSWORD"],
+            },
+            timeout=10,
+        )
         if r.status_code == 200:
             token = r.json().get("token")
             log.info("Payload JWT obtained")
             return token
         log.error(f"Payload login failed {r.status_code}: {r.text[:200]}")
         return None
+    except TransientHTTPError as e:
+        log.error(f"Payload login failed after retries: {e}")
+        return None
     except Exception as e:
         log.error(f"Payload login error: {e}")
         return None
+
+
 def post_to_payload(
     generated: dict, content_json: dict, featured_image_url: str | None, jwt: str
 ) -> bool:
@@ -1303,17 +1880,22 @@ def post_to_payload(
     POST the generated post to Payload CMS as a published document.
     Field names match exactly what's in your inlight_posts table.
     Omits featuredImage when featured_image_url is None.
-    Returns True on success, False on failure.
+    Returns True on success, False on permanent failure (e.g. duplicate slug, 4xx).
+    Raises TransientHTTPError when retries are exhausted on timeouts / 5xx / network errors
+    so the caller can leave the article unseen for a later run.
     """
     now_iso = datetime.now(timezone.utc).isoformat()
     # Ensure slug is URL-safe
     safe_slug = slugify(generated.get("slug") or generated.get("title", "post"))
     # Check if slug already exists
-    check = httpx.get(
+    check = http_request(
+        "GET",
         PAYLOAD_API_URL,
+        label=f"Payload slug check ({safe_slug})",
+        max_attempts=PAYLOAD_HTTP_MAX_ATTEMPTS,
         params={"where[slug][equals]": safe_slug, "limit": 1},
         headers={"Authorization": f"JWT {jwt}"},
-        timeout=10
+        timeout=10,
     )
     if check.status_code == 200 and check.json().get("totalDocs", 0) > 0:
         log.warning(f"Slug already exists, skipping: {safe_slug}")
@@ -1340,27 +1922,32 @@ def post_to_payload(
         "Authorization": f"JWT {jwt}",
         "Content-Type":  "application/json",
     }
-    try:
-        r = httpx.post(PAYLOAD_API_URL, json=payload, headers=headers, timeout=15)
-        if r.status_code in (200, 201):
-            doc = r.json()
-            doc_id = doc.get("doc", {}).get("id") or doc.get("id", "unknown")
-            log.info(f"✅ Published post ID {doc_id}: {generated['title'][:60]}")
-            return True
-        else:
-            log.error(f"Payload API returned {r.status_code}: {r.text[:300]}")
-            return False
-    except Exception as e:
-        log.error(f"Payload POST failed: {e}")
-        return False
+    r = http_request(
+        "POST",
+        PAYLOAD_API_URL,
+        label=f"Payload POST ({safe_slug})",
+        max_attempts=PAYLOAD_HTTP_MAX_ATTEMPTS,
+        json=payload,
+        headers=headers,
+        timeout=15,
+    )
+    if r.status_code in (200, 201):
+        doc = r.json()
+        doc_id = doc.get("doc", {}).get("id") or doc.get("id", "unknown")
+        log.info(f"✅ Published post ID {doc_id}: {generated['title'][:60]}")
+        return True
+    log.error(f"Payload API returned {r.status_code}: {r.text[:300]}")
+    return False
 # ─── Main pipeline ────────────────────────────────────────────────────────────
 def main(dry_run: bool = False):
     log.info("=== Xetarev SEO News Agent starting ===")
     if dry_run:
         dry_print(
             "Mode",
-            "Dry-run enabled — Payload POST and seen_articles.json updates are skipped.\n"
-            "Pipeline still fetches feeds, extracts text, calls Gemini, and resolves images.",
+            "Dry-run enabled — Payload POST, seen_articles.json, and "
+            "feed_quality.json updates are skipped.\n"
+            "Pipeline still fetches feeds, runs the title-first relevance gate, "
+            "extracts text, calls Gemini, and resolves images.",
         )
 
     jwt = None
@@ -1371,14 +1958,18 @@ def main(dry_run: bool = False):
             return
 
     seen = load_seen()
+    feed_stats = load_feed_stats()
     log.info(f"Loaded {len(seen)} previously seen article IDs")
+    log.info(f"Loaded quality stats for {len(feed_stats)} feed(s)")
 
     published_count = 0
     processed_count = 0
     used_feeds: set[str] = set()
 
     while published_count < MIN_PUBLISH:
-        articles = fetch_new_articles(seen, used_feeds, dry_run=dry_run)
+        articles = fetch_new_articles(
+            seen, used_feeds, feed_stats=feed_stats, dry_run=dry_run
+        )
         if not articles:
             # Empty batch can mean either: selected feeds had only seen articles,
             # or every feed has already been polled. Keep going while unused feeds remain.
@@ -1411,8 +2002,53 @@ def main(dry_run: bool = False):
                     f"source: {article.get('source', '')}",
                 )
 
-            # 1. Get article text
-            body_text = get_article_text(article, dry_run=dry_run)
+            # 1. Title-first relevance gate — before any article-body HTTP fetch
+            relevant = title_relevance_check(article, dry_run=dry_run)
+            if relevant is False:
+                log.info(
+                    f"Skipping off-topic article (title gate, marked seen): "
+                    f"{article['title'][:70]}"
+                )
+                if dry_run:
+                    dry_print(
+                        "Outcome",
+                        "SKIPPED — title-first relevance gate (skip: true); "
+                        "no article body fetch",
+                    )
+                else:
+                    record_feed_outcome(
+                        feed_stats,
+                        article.get("feed_url", ""),
+                        article.get("source", ""),
+                        "skipped",
+                    )
+                seen.add(article["id"])
+                continue
+            if relevant is None:
+                log.warning("Title relevance check failed, skipping.")
+                if dry_run:
+                    dry_print(
+                        "Outcome",
+                        "SKIPPED — title-first relevance check failed; "
+                        "no article body fetch",
+                    )
+                seen.add(article["id"])
+                continue
+
+            # 2. Get article text (may HTTP-fetch via trafilatura)
+            try:
+                body_text = get_article_text(article, dry_run=dry_run)
+            except TransientHTTPError as e:
+                log.warning(
+                    f"Article body fetch failed after retries — leaving unseen: {e}"
+                )
+                if dry_run:
+                    dry_print(
+                        "Outcome",
+                        "DEFERRED — article body HTTP fetch failed after retries; "
+                        "not marked seen",
+                    )
+                continue
             if not body_text:
                 log.warning("No usable text, skipping.")
                 if dry_run:
@@ -1423,7 +2059,7 @@ def main(dry_run: bool = False):
                 seen.add(article["id"])
                 continue
 
-            # 2. Generate post content via Gemini
+            # 3. Generate post content via Gemini
             generated = generate_post(article, body_text, dry_run=dry_run)
             if not generated:
                 log.warning("Gemini generation failed, skipping.")
@@ -1431,16 +2067,6 @@ def main(dry_run: bool = False):
                     dry_print(
                         "Outcome",
                         "SKIPPED — Gemini generation failed or returned invalid JSON",
-                    )
-                seen.add(article["id"])
-                continue
-
-            if generated.get("skip"):
-                log.info(f"Skipping off-topic article (marked seen): {article['title'][:70]}")
-                if dry_run:
-                    dry_print(
-                        "Outcome",
-                        "SKIPPED — Gemini marked article as off-topic (skip: true)",
                     )
                 seen.add(article["id"])
                 continue
@@ -1464,37 +2090,22 @@ def main(dry_run: bool = False):
                 seen.add(article["id"])
                 continue
 
-            # 3. Featured image: prefer RSS feed image; DDG fallback (None if none).
-            #    Inline body image via DDG only, distinct from featured when both exist.
+            # Content decision: Gemini approved this article — credit the feed now.
+            # Payload/CMS outcomes must never touch feed_quality stats.
+            if not dry_run:
+                record_feed_outcome(
+                    feed_stats,
+                    article.get("feed_url", ""),
+                    article.get("source", ""),
+                    "published",
+                )
+
+            # 4. Featured + inline images concurrently (independent HTTP roundtrips)
             image_query = " ".join(generated.get("keywords", [])[:3]) or article["title"][:40]
-            feed_image = article.get("image")
-            feed_accessible = False
-            if feed_image:
-                feed_accessible = is_image_accessible(feed_image)
-            if dry_run:
-                dry_print(
-                    "Featured image (from RSS)",
-                    f"URL: {feed_image or '(none)'}\n"
-                    f"Accessibility check: "
-                    f"{'PASSED' if feed_accessible else 'FAILED' if feed_image else 'N/A (no RSS image)'}",
-                )
-            if feed_image and feed_accessible:
-                featured_image_url = feed_image
-                log.info(f"Using RSS feed image for featured: {feed_image[:80]}")
-            else:
-                if feed_image:
-                    log.info("RSS feed image present but not accessible; falling back to DDG")
-                featured_image_url = find_image_url(
-                    image_query,
-                    dry_run=dry_run,
-                    dry_label="Featured image (DDG)",
-                )
-            inline_exclude = {featured_image_url} if featured_image_url else None
-            inline_image_url = find_image_url(
+            featured_image_url, inline_image_url = resolve_featured_and_inline_images(
                 image_query,
-                exclude_urls=inline_exclude,
+                article.get("image"),
                 dry_run=dry_run,
-                dry_label="Inline DDG image",
             )
 
             # 3b. Humanize + audit generated paragraphs (before Lexical build)
@@ -1528,17 +2139,27 @@ def main(dry_run: bool = False):
                 )
                 success = True
             else:
-                # 5. POST to Payload
-                success = post_to_payload(generated, content_json, featured_image_url, jwt)
+                # 5. POST to Payload (retries transient failures; may raise)
+                try:
+                    success = post_to_payload(
+                        generated, content_json, featured_image_url, jwt
+                    )
+                except TransientHTTPError as e:
+                    log.error(
+                        f"Payload publish failed after retries — leaving unseen: {e}"
+                    )
+                    # Generation already burned Gemini quota — pause before next article
+                    time.sleep(3)
+                    continue
 
-            # 6. Mark as seen regardless of publish success
-            # (so a broken post doesn't retry and spam your CMS)
+            # Mark seen on success or permanent publish failure (duplicate slug, 4xx).
+            # Transient failures above leave the article unseen for a later run.
             seen.add(article["id"])
 
             if success:
                 published_count += 1
 
-            # Respect Gemini free tier rate limit — pause between articles
+            # Pause only after a real generate_post path (not early skips)
             time.sleep(3)
 
     if dry_run:
@@ -1546,8 +2167,14 @@ def main(dry_run: bool = False):
             "save_seen",
             f"SKIPPED — would have saved {len(seen)} seen article IDs to {STATE_FILE}",
         )
+        dry_print(
+            "save_feed_stats",
+            f"SKIPPED — would have saved quality stats for {len(feed_stats)} "
+            f"feed(s) to {FEED_STATS_FILE}",
+        )
     else:
         save_seen(seen)
+        save_feed_stats(feed_stats)
     log.info(
         f"=== Done. Published {published_count}/{MIN_PUBLISH} target "
         f"({processed_count} articles processed, {len(used_feeds)} feeds polled). ==="
@@ -1559,7 +2186,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Run the full pipeline without publishing to Payload or updating seen_articles.json; print verbose diagnostics",
+        help="Run the full pipeline without publishing to Payload or updating "
+             "seen_articles.json / feed_quality.json; print verbose diagnostics",
     )
     args = parser.parse_args()
     main(dry_run=args.dry_run)

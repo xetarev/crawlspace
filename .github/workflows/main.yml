@@ -38,8 +38,8 @@ jobs:
           PAYLOAD_PASSWORD: ${{ secrets.PAYLOAD_PASSWORD }}
         run: python agent.py
 
-      - name: Commit updated seen_articles.json
+      - name: Commit updated agent state
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update seen articles [skip ci]"
-          file_pattern: seen_articles.json
+          commit_message: "chore: update agent state [skip ci]"
+          file_pattern: seen_articles.json feed_quality.json
