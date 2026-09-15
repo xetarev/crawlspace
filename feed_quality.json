@@ -39,6 +39,11 @@
     "published": 1,
     "skipped": 0
   },
+  "https://techcrunch.com/feed/": {
+    "name": "TechCrunch",
+    "published": 0,
+    "skipped": 1
+  },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
     "published": 1,
@@ -61,7 +66,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 0,
+    "published": 1,
     "skipped": 1
   },
   "https://www.pcmag.com/feeds/rss/latest": {
@@ -76,7 +81,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 1,
+    "published": 2,
     "skipped": 0
   },
   "https://www.tomshardware.com/feeds.xml": {
