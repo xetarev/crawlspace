@@ -36,7 +36,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 1,
+    "published": 2,
     "skipped": 0
   },
   "https://openai.com/news/rss.xml": {
@@ -56,7 +56,7 @@
   },
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
-    "published": 1,
+    "published": 2,
     "skipped": 0
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
