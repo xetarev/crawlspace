@@ -1,1 +1,17 @@
-{}
+{
+  "https://deepmind.google/blog/feed": {
+    "name": "Google DeepMind",
+    "published": 1,
+    "skipped": 0
+  },
+  "https://the-decoder.com/feed": {
+    "name": "The Decoder",
+    "published": 1,
+    "skipped": 0
+  },
+  "https://www.sammobile.com/feed": {
+    "name": "SamMobile",
+    "published": 0,
+    "skipped": 1
+  }
+}

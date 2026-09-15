@@ -402,6 +402,9 @@ Voice:
 - Direct opinions. Sharp and informed. Human.
 - Skeptical of hype; call out spin. Respect good engineering.
 - No corporate press-release tone. No generic AI-blog filler.
+Burstiness (write like a human, not a uniform model):
+- When it comes to writing content, two factors are crucial — perplexity and burstiness. Perplexity measures the complexity of text. Separately, burstiness compares the variations of sentences. Humans tend to write with greater burstiness, for example, with some longer or complex sentences alongside shorter ones. AI sentences tend to be more uniform.
+- Mix short punchy sentences with longer, winding ones. Vary rhythm on purpose. Avoid even sentence lengths.
 """
 # ─── State management ────────────────────────────────────────────────────────
 def load_seen() -> set:
@@ -1095,6 +1098,7 @@ Instructions:
 - Write a fresh, original post. Do NOT copy sentences from the source. Rewrite everything.
 - Length: 500-550 words across 4–6 paragraphs.
 - Voice: knowledgeable individual with a point of view. First person where natural. Direct opinions. Sharp, informed, human — not an AI content pipeline.
+- Burstiness: deliberately mix short sentences (under ~8 words) with longer ones (30+ words). Avoid uniform sentence length.
 - End the post naturally. Do NOT mention Xetarev, Xetarev Studio, or Xetarev Apps.
 - SEO-optimized: use the main topic keyword naturally in the title and early in the body.
 - The excerpt should be 1–2 sentences, punchy, suitable for a feed preview.
@@ -1438,7 +1442,8 @@ def _contains_replaceable_ai_vocab(text: str) -> bool:
 def _humanizer_skill_pattern_pass(text: str) -> str:
     """
     Deterministic cleanup pass mirroring the humanizer-skill pattern catalog:
-    hollow openers, hedging, AI vocabulary, em dashes, and leftover filler.
+    hollow openers, hedging, AI vocabulary, and leftover filler.
+    Em dashes are preserved (burstiness prompts inject them intentionally).
     """
     rewrite = text
 
@@ -1465,13 +1470,7 @@ def _humanizer_skill_pattern_pass(text: str) -> str:
 
         rewrite = pattern.sub(_swap, rewrite)
 
-    if "—" in rewrite or "–" in rewrite:
-        rewrite = (
-            rewrite.replace(" — ", ", ")
-            .replace("—", ", ")
-            .replace(" – ", ", ")
-            .replace("–", ", ")
-        )
+    # Keep intentional em dashes / en dashes — burstiness prompts use them on purpose.
 
     rewrite = re.sub(r" {2,}", " ", rewrite)
     rewrite = re.sub(r" ([,.!?;:])", r"\1", rewrite)
@@ -1558,15 +1557,26 @@ def rewrite_paragraphs_for_human_voice(
     prompt = f"""
 {BRAND_CONTEXT}
 Your task: Rewrite the blog post body below so it sounds more human and less AI-generated.
+Prioritize burstiness at the sentence and paragraph level — not vague "more conversational" tone.
 
 Current body paragraphs:
 \"\"\"
 {body[:4000]}
 \"\"\"
 
-Rewrite instructions:
-- Sound less structured and formulaic; more direct and conversational.
-- Use first person where it feels natural.
+Structural requirements (non-negotiable):
+- Every paragraph must contain at least one sentence under 8 words
+  AND one sentence over 30 words.
+- Prefer even sharper contrast where natural: at least one sentence over 35 words
+  and one under 4 words somewhere in the post (fragments OK).
+- No two consecutive sentences may start with the same word.
+- Include one rhetorical question somewhere in the post.
+- Use at least one em-dash interruption or parenthetical aside.
+- One paragraph may start with "But" or "And" — this is intentional.
+- Vary paragraph length: at least one paragraph under 40 words,
+  one over 80 words.
+
+Also:
 - Cut AI vocabulary, hedging, and promotional buzzwords.
 - Keep the same ideas and approximate length (350–500 words across 4–6 paragraphs).
 - If a paragraph is exactly [IMAGE], keep that line as its own paragraph unchanged.
@@ -1940,7 +1950,7 @@ def post_to_payload(
     return False
 # ─── Main pipeline ────────────────────────────────────────────────────────────
 def main(dry_run: bool = False):
-    log.info("=== Xetarev SEO News Agent starting ===")
+    log.info("=== Xetarev Crawlspace (Agent) initializing ===")
     if dry_run:
         dry_print(
             "Mode",
@@ -2182,7 +2192,7 @@ def main(dry_run: bool = False):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Xetarev SEO News Agent")
+    parser = argparse.ArgumentParser(description="Xetarev Crawlspace (Agent)")
     parser.add_argument(
         "--dry-run",
         action="store_true",
