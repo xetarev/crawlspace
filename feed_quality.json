@@ -19,6 +19,11 @@
     "published": 1,
     "skipped": 1
   },
+  "https://feeds.arstechnica.com/arstechnica/index": {
+    "name": "Ars Technica",
+    "published": 0,
+    "skipped": 1
+  },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
     "name": "VentureBeat",
     "published": 2,
@@ -27,7 +32,7 @@
   "https://feeds.macrumors.com/MacRumors-All": {
     "name": "MacRumors",
     "published": 0,
-    "skipped": 1
+    "skipped": 2
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -41,7 +46,7 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 1,
+    "published": 2,
     "skipped": 0
   },
   "https://techcrunch.com/feed/": {
@@ -59,6 +64,11 @@
     "published": 2,
     "skipped": 0
   },
+  "https://www.cnet.com/rss/news/": {
+    "name": "CNET",
+    "published": 1,
+    "skipped": 0
+  },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
     "published": 0,
@@ -72,7 +82,7 @@
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
     "published": 0,
-    "skipped": 1
+    "skipped": 2
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
