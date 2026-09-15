@@ -1,4 +1,9 @@
 {
+  "https://9to5google.com/feed": {
+    "name": "9to5Google",
+    "published": 0,
+    "skipped": 2
+  },
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
     "published": 0,
@@ -6,7 +11,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 1,
+    "published": 2,
     "skipped": 0
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -16,7 +21,7 @@
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
     "name": "VentureBeat",
-    "published": 1,
+    "published": 2,
     "skipped": 0
   },
   "https://feeds.macrumors.com/MacRumors-All": {
@@ -28,6 +33,11 @@
     "name": "Gizmodo",
     "published": 0,
     "skipped": 1
+  },
+  "https://huggingface.co/blog/feed.xml": {
+    "name": "Hugging Face",
+    "published": 1,
+    "skipped": 0
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
@@ -49,15 +59,30 @@
     "published": 0,
     "skipped": 1
   },
+  "https://www.makeuseof.com/feed/category/technology-explained/": {
+    "name": "MakeUseOf",
+    "published": 0,
+    "skipped": 1
+  },
+  "https://www.pcmag.com/feeds/rss/latest": {
+    "name": "PCMag",
+    "published": 0,
+    "skipped": 1
+  },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
     "published": 0,
     "skipped": 1
   },
+  "https://www.technologyreview.com/feed": {
+    "name": "MIT Technology Review",
+    "published": 1,
+    "skipped": 0
+  },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
     "published": 1,
-    "skipped": 0
+    "skipped": 1
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
