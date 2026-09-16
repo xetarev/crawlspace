@@ -31,7 +31,7 @@
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
-    "published": 3,
+    "published": 4,
     "skipped": 1
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
@@ -106,7 +106,7 @@
   },
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
-    "published": 0,
+    "published": 1,
     "skipped": 3
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
@@ -132,7 +132,7 @@
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
     "published": 1,
-    "skipped": 3
+    "skipped": 4
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
