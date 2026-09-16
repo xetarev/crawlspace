@@ -22,7 +22,7 @@
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
     "published": 0,
-    "skipped": 2
+    "skipped": 3
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
@@ -41,7 +41,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 1,
+    "published": 2,
     "skipped": 1
   },
   "https://gizmodo.com/rss": {
@@ -56,7 +56,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 4,
+    "published": 5,
     "skipped": 1
   },
   "https://openai.com/news/rss.xml": {
