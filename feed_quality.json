@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 8,
+    "published": 9,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 2,
+    "published": 3,
     "skipped": 1
   },
   "https://www.tomshardware.com/feeds.xml": {
