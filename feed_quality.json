@@ -47,7 +47,7 @@
   "https://futurism.com/feed": {
     "name": "Futurism",
     "published": 2,
-    "skipped": 1
+    "skipped": 2
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 6,
+    "published": 7,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 1,
+    "published": 2,
     "skipped": 1
   },
   "https://www.wired.com/feed/rss": {
