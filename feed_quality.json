@@ -7,7 +7,7 @@
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
     "published": 0,
-    "skipped": 1
+    "skipped": 2
   },
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
@@ -31,7 +31,7 @@
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
-    "published": 1,
+    "published": 2,
     "skipped": 1
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 2,
+    "published": 3,
     "skipped": 2
   },
   "https://www.pcmag.com/feeds/rss/latest": {
