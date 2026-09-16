@@ -6,13 +6,13 @@
   },
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
-    "published": 0,
+    "published": 1,
     "skipped": 2
   },
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
     "published": 1,
-    "skipped": 2
+    "skipped": 3
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
@@ -47,7 +47,7 @@
   "https://futurism.com/feed": {
     "name": "Futurism",
     "published": 2,
-    "skipped": 2
+    "skipped": 3
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -81,7 +81,7 @@
   },
   "https://www.androidauthority.com/feed": {
     "name": "Android Authority",
-    "published": 0,
+    "published": 1,
     "skipped": 2
   },
   "https://www.androidpolice.com/feed": {
