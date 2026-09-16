@@ -26,7 +26,7 @@
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
-    "published": 0,
+    "published": 1,
     "skipped": 3
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
@@ -66,7 +66,7 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 4,
+    "published": 5,
     "skipped": 0
   },
   "https://techcrunch.com/feed/": {
