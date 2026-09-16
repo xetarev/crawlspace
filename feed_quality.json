@@ -72,7 +72,7 @@
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
     "published": 1,
-    "skipped": 2
+    "skipped": 3
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
@@ -87,7 +87,7 @@
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 2,
-    "skipped": 0
+    "skipped": 1
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 4,
+    "published": 5,
     "skipped": 2
   },
   "https://www.techradar.com/feeds.xml": {
@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 3,
+    "published": 4,
     "skipped": 1
   },
   "https://www.tomshardware.com/feeds.xml": {
