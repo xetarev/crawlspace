@@ -102,7 +102,7 @@
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
     "published": 0,
-    "skipped": 1
+    "skipped": 2
   },
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 3,
+    "published": 4,
     "skipped": 2
   },
   "https://www.pcmag.com/feeds/rss/latest": {
@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 2,
+    "published": 3,
     "skipped": 1
   },
   "https://www.wired.com/feed/rss": {
