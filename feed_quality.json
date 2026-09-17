@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 7,
+    "published": 8,
     "skipped": 2
   },
   "https://openai.com/news/rss.xml": {
@@ -91,7 +91,7 @@
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
-    "published": 3,
+    "published": 4,
     "skipped": 2
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
