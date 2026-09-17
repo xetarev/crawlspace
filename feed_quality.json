@@ -12,7 +12,7 @@
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
     "published": 1,
-    "skipped": 3
+    "skipped": 4
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 11,
+    "published": 12,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -72,7 +72,7 @@
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
     "published": 4,
-    "skipped": 3
+    "skipped": 4
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 5,
+    "published": 6,
     "skipped": 2
   },
   "https://www.techradar.com/feeds.xml": {
@@ -147,7 +147,7 @@
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
     "published": 1,
-    "skipped": 2
+    "skipped": 3
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
