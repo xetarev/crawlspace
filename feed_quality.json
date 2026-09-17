@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 12,
+    "published": 13,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -72,11 +72,11 @@
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
     "published": 5,
-    "skipped": 4
+    "skipped": 5
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 4,
+    "published": 5,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -137,7 +137,7 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 5,
-    "skipped": 3
+    "skipped": 4
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
