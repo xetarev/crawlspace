@@ -66,7 +66,7 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 9,
+    "published": 10,
     "skipped": 1
   },
   "https://techcrunch.com/feed/": {
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 3,
+    "published": 4,
     "skipped": 3
   },
   "https://www.zdnet.com/news/rss.xml": {
