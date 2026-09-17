@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 5,
+    "published": 6,
     "skipped": 5
   },
   "https://the-decoder.com/feed": {
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 6,
+    "published": 7,
     "skipped": 3
   },
   "https://www.techradar.com/feeds.xml": {
