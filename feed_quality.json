@@ -12,7 +12,7 @@
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
     "published": 1,
-    "skipped": 4
+    "skipped": 5
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 15,
+    "published": 16,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -87,7 +87,7 @@
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 3,
-    "skipped": 2
+    "skipped": 3
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 4,
+    "published": 5,
     "skipped": 5
   },
   "https://www.pcmag.com/feeds/rss/latest": {
@@ -137,12 +137,12 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 7,
-    "skipped": 4
+    "skipped": 5
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
     "published": 6,
-    "skipped": 1
+    "skipped": 2
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
