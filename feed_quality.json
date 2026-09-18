@@ -16,7 +16,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 13,
+    "published": 14,
     "skipped": 0
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -26,7 +26,7 @@
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
-    "published": 1,
+    "published": 2,
     "skipped": 3
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
