@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 7,
+    "published": 8,
     "skipped": 3
   },
   "https://www.techradar.com/feeds.xml": {
@@ -146,7 +146,7 @@
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
-    "published": 1,
+    "published": 2,
     "skipped": 4
   },
   "https://www.xda-developers.com/feed": {
