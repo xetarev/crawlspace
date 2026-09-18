@@ -66,12 +66,12 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 13,
+    "published": 14,
     "skipped": 1
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 7,
+    "published": 8,
     "skipped": 5
   },
   "https://the-decoder.com/feed": {
