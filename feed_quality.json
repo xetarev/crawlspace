@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 19,
+    "published": 20,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -91,7 +91,7 @@
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
-    "published": 4,
+    "published": 5,
     "skipped": 4
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
@@ -137,7 +137,7 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 10,
-    "skipped": 5
+    "skipped": 6
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
