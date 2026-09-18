@@ -22,7 +22,7 @@
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
     "published": 5,
-    "skipped": 1
+    "skipped": 2
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
@@ -76,7 +76,7 @@
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 5,
+    "published": 6,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 8,
+    "published": 9,
     "skipped": 5
   },
   "https://www.tomshardware.com/feeds.xml": {
