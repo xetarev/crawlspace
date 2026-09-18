@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 16,
+    "published": 17,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 4,
+    "published": 5,
     "skipped": 3
   },
   "https://www.zdnet.com/news/rss.xml": {
