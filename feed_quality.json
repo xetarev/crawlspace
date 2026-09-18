@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 10,
+    "published": 11,
     "skipped": 3
   },
   "https://openai.com/news/rss.xml": {
@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 5,
+    "published": 6,
     "skipped": 5
   },
   "https://www.pcmag.com/feeds/rss/latest": {
