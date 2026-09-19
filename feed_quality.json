@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 12,
+    "published": 13,
     "skipped": 3
   },
   "https://openai.com/news/rss.xml": {
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 8,
+    "published": 9,
     "skipped": 5
   },
   "https://the-decoder.com/feed": {
