@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 12,
+    "published": 13,
     "skipped": 5
   },
   "https://the-decoder.com/feed": {
@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 14,
+    "published": 15,
     "skipped": 6
   },
   "https://www.tomshardware.com/feeds.xml": {
