@@ -47,7 +47,7 @@
   "https://futurism.com/feed": {
     "name": "Futurism",
     "published": 5,
-    "skipped": 4
+    "skipped": 5
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -76,7 +76,7 @@
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 10,
+    "published": 11,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 9,
+    "published": 10,
     "skipped": 3
   },
   "https://www.techradar.com/feeds.xml": {
