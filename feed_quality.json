@@ -16,7 +16,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 14,
+    "published": 15,
     "skipped": 0
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -46,7 +46,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 4,
+    "published": 5,
     "skipped": 4
   },
   "https://gizmodo.com/rss": {
