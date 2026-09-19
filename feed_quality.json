@@ -6,7 +6,7 @@
   },
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
-    "published": 5,
+    "published": 6,
     "skipped": 3
   },
   "https://appleinsider.com/rss/news": {
@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 8,
+    "published": 9,
     "skipped": 3
   },
   "https://www.wired.com/feed/rss": {
