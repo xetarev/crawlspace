@@ -16,7 +16,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 16,
+    "published": 17,
     "skipped": 0
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -101,7 +101,7 @@
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
-    "published": 2,
+    "published": 3,
     "skipped": 4
   },
   "https://www.macworld.com/index.rss": {
@@ -157,6 +157,6 @@
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
     "published": 5,
-    "skipped": 5
+    "skipped": 6
   }
 }
