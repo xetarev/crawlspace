@@ -32,7 +32,7 @@
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
     "published": 6,
-    "skipped": 7
+    "skipped": 8
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
     "name": "VentureBeat",
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 13,
+    "published": 14,
     "skipped": 5
   },
   "https://the-decoder.com/feed": {
@@ -146,7 +146,7 @@
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
-    "published": 4,
+    "published": 5,
     "skipped": 4
   },
   "https://www.xda-developers.com/feed": {
