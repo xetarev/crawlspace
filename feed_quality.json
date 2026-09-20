@@ -62,7 +62,7 @@
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
     "published": 20,
-    "skipped": 6
+    "skipped": 7
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
@@ -72,11 +72,11 @@
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
     "published": 15,
-    "skipped": 5
+    "skipped": 6
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 16,
+    "published": 17,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -102,7 +102,7 @@
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
     "published": 4,
-    "skipped": 7
+    "skipped": 8
   },
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
@@ -142,7 +142,7 @@
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
     "published": 10,
-    "skipped": 4
+    "skipped": 5
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 6,
+    "published": 7,
     "skipped": 4
   },
   "https://www.zdnet.com/news/rss.xml": {
