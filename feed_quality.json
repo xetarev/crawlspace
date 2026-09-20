@@ -27,7 +27,7 @@
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
     "published": 3,
-    "skipped": 6
+    "skipped": 7
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 25,
+    "published": 26,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -102,7 +102,7 @@
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
     "published": 3,
-    "skipped": 4
+    "skipped": 5
   },
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 7,
+    "published": 8,
     "skipped": 6
   },
   "https://www.pcmag.com/feeds/rss/latest": {
