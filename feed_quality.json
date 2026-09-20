@@ -1,7 +1,7 @@
 {
   "https://9to5google.com/feed": {
     "name": "9to5Google",
-    "published": 1,
+    "published": 2,
     "skipped": 4
   },
   "https://9to5mac.com/feed": {
@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 10,
+    "published": 11,
     "skipped": 5
   },
   "https://www.wired.com/feed/rss": {
