@@ -7,7 +7,7 @@
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
     "published": 6,
-    "skipped": 5
+    "skipped": 6
   },
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
@@ -61,13 +61,13 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 17,
+    "published": 18,
     "skipped": 5
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
     "published": 19,
-    "skipped": 2
+    "skipped": 3
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
@@ -87,7 +87,7 @@
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 4,
-    "skipped": 4
+    "skipped": 5
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
@@ -101,7 +101,7 @@
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
-    "published": 3,
+    "published": 4,
     "skipped": 5
   },
   "https://www.macworld.com/index.rss": {
@@ -137,7 +137,7 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 15,
-    "skipped": 6
+    "skipped": 7
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
