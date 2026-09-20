@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 9,
+    "published": 10,
     "skipped": 2
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 14,
+    "published": 15,
     "skipped": 5
   },
   "https://the-decoder.com/feed": {
@@ -107,7 +107,7 @@
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
     "published": 2,
-    "skipped": 6
+    "skipped": 7
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
