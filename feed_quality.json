@@ -47,7 +47,7 @@
   "https://futurism.com/feed": {
     "name": "Futurism",
     "published": 6,
-    "skipped": 5
+    "skipped": 6
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -66,7 +66,7 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 20,
+    "published": 21,
     "skipped": 6
   },
   "https://techcrunch.com/feed/": {
@@ -86,7 +86,7 @@
   },
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
-    "published": 5,
+    "published": 6,
     "skipped": 6
   },
   "https://www.cnet.com/rss/news/": {
