@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 24,
+    "published": 25,
     "skipped": 9
   },
   "https://openai.com/news/rss.xml": {
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 9,
+    "published": 10,
     "skipped": 4
   },
   "https://www.zdnet.com/news/rss.xml": {
