@@ -26,7 +26,7 @@
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
-    "published": 4,
+    "published": 5,
     "skipped": 8
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 30,
+    "published": 31,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
