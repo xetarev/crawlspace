@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 29,
+    "published": 30,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -87,7 +87,7 @@
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 6,
-    "skipped": 6
+    "skipped": 7
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 9,
+    "published": 10,
     "skipped": 7
   },
   "https://www.pcmag.com/feeds/rss/latest": {
@@ -127,7 +127,7 @@
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
     "published": 10,
-    "skipped": 3
+    "skipped": 4
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
