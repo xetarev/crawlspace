@@ -46,7 +46,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 7,
+    "published": 8,
     "skipped": 6
   },
   "https://gizmodo.com/rss": {
@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 22,
+    "published": 23,
     "skipped": 8
   },
   "https://openai.com/news/rss.xml": {
@@ -72,7 +72,7 @@
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
     "published": 16,
-    "skipped": 6
+    "skipped": 7
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
