@@ -26,7 +26,7 @@
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
-    "published": 5,
+    "published": 6,
     "skipped": 8
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 10,
+    "published": 11,
     "skipped": 7
   },
   "https://www.pcmag.com/feeds/rss/latest": {
