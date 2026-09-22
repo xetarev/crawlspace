@@ -56,12 +56,12 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 31,
+    "published": 32,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 26,
+    "published": 27,
     "skipped": 9
   },
   "https://openai.com/news/rss.xml": {
