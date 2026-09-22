@@ -12,7 +12,7 @@
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
     "published": 1,
-    "skipped": 7
+    "skipped": 8
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
@@ -92,7 +92,7 @@
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
     "published": 5,
-    "skipped": 10
+    "skipped": 11
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
@@ -117,7 +117,7 @@
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 3,
-    "skipped": 7
+    "skipped": 8
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
@@ -132,12 +132,12 @@
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
     "published": 1,
-    "skipped": 6
+    "skipped": 7
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 16,
-    "skipped": 12
+    "skipped": 13
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
