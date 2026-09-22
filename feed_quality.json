@@ -102,7 +102,7 @@
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
     "published": 6,
-    "skipped": 10
+    "skipped": 11
   },
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 11,
+    "published": 12,
     "skipped": 7
   },
   "https://www.wired.com/feed/rss": {
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 10,
+    "published": 11,
     "skipped": 6
   },
   "https://www.zdnet.com/news/rss.xml": {
