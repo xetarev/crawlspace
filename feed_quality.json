@@ -16,7 +16,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 25,
+    "published": 26,
     "skipped": 0
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -31,7 +31,7 @@
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
-    "published": 7,
+    "published": 8,
     "skipped": 9
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
@@ -117,7 +117,7 @@
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 3,
-    "skipped": 6
+    "skipped": 7
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
@@ -142,7 +142,7 @@
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
     "published": 12,
-    "skipped": 7
+    "skipped": 8
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
