@@ -116,7 +116,7 @@
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
-    "published": 4,
+    "published": 5,
     "skipped": 8
   },
   "https://www.sammobile.com/feed": {
@@ -156,7 +156,7 @@
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
-    "published": 10,
+    "published": 11,
     "skipped": 10
   }
 }
