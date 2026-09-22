@@ -87,7 +87,7 @@
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 6,
-    "skipped": 7
+    "skipped": 8
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
@@ -112,7 +112,7 @@
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
     "published": 11,
-    "skipped": 8
+    "skipped": 9
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 10,
+    "published": 11,
     "skipped": 5
   },
   "https://www.techradar.com/feeds.xml": {
@@ -151,12 +151,12 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 11,
+    "published": 12,
     "skipped": 6
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
     "published": 10,
-    "skipped": 9
+    "skipped": 10
   }
 }
