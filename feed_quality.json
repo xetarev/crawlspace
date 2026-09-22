@@ -6,7 +6,7 @@
   },
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
-    "published": 8,
+    "published": 9,
     "skipped": 8
   },
   "https://appleinsider.com/rss/news": {
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 21,
+    "published": 22,
     "skipped": 7
   },
   "https://the-decoder.com/feed": {
@@ -147,7 +147,7 @@
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
     "published": 8,
-    "skipped": 7
+    "skipped": 8
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
