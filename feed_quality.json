@@ -47,7 +47,7 @@
   "https://futurism.com/feed": {
     "name": "Futurism",
     "published": 8,
-    "skipped": 6
+    "skipped": 7
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -106,7 +106,7 @@
   },
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
-    "published": 2,
+    "published": 3,
     "skipped": 8
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
@@ -136,13 +136,13 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 15,
+    "published": 16,
     "skipped": 11
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
     "published": 11,
-    "skipped": 6
+    "skipped": 7
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
@@ -152,7 +152,7 @@
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
     "published": 10,
-    "skipped": 5
+    "skipped": 6
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
