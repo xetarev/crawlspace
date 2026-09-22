@@ -71,12 +71,12 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 16,
+    "published": 17,
     "skipped": 7
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 19,
+    "published": 20,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -152,7 +152,7 @@
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
     "published": 10,
-    "skipped": 4
+    "skipped": 5
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
