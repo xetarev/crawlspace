@@ -31,7 +31,7 @@
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
-    "published": 8,
+    "published": 9,
     "skipped": 9
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 19,
+    "published": 20,
     "skipped": 7
   },
   "https://the-decoder.com/feed": {
