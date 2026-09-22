@@ -6,7 +6,7 @@
   },
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
-    "published": 7,
+    "published": 8,
     "skipped": 8
   },
   "https://appleinsider.com/rss/news": {
@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 11,
+    "published": 12,
     "skipped": 9
   },
   "https://www.pcmag.com/feeds/rss/latest": {
