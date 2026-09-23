@@ -16,7 +16,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 30,
+    "published": 31,
     "skipped": 0
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -27,7 +27,7 @@
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
     "published": 7,
-    "skipped": 11
+    "skipped": 12
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 17,
+    "published": 18,
     "skipped": 15
   },
   "https://www.tomshardware.com/feeds.xml": {
@@ -147,7 +147,7 @@
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
     "published": 10,
-    "skipped": 8
+    "skipped": 9
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
