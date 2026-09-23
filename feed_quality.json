@@ -16,12 +16,12 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 28,
+    "published": 29,
     "skipped": 0
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 16,
+    "published": 17,
     "skipped": 3
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
