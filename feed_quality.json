@@ -7,7 +7,7 @@
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
     "published": 9,
-    "skipped": 8
+    "skipped": 9
   },
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
@@ -27,12 +27,12 @@
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
     "published": 6,
-    "skipped": 10
+    "skipped": 11
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
     "published": 9,
-    "skipped": 9
+    "skipped": 10
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
     "name": "VentureBeat",
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 35,
+    "published": 36,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -92,7 +92,7 @@
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
     "published": 5,
-    "skipped": 11
+    "skipped": 12
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 12,
+    "published": 13,
     "skipped": 9
   },
   "https://www.pcmag.com/feeds/rss/latest": {
