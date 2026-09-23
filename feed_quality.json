@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 37,
+    "published": 38,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -127,7 +127,7 @@
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
     "published": 11,
-    "skipped": 6
+    "skipped": 7
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
@@ -146,13 +146,13 @@
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
-    "published": 8,
+    "published": 9,
     "skipped": 8
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
     "published": 12,
-    "skipped": 6
+    "skipped": 7
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
