@@ -16,7 +16,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 29,
+    "published": 30,
     "skipped": 0
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 41,
+    "published": 42,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -122,7 +122,7 @@
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
     "published": 0,
-    "skipped": 3
+    "skipped": 4
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
