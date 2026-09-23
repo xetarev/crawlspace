@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 12,
+    "published": 13,
     "skipped": 9
   },
   "https://www.techradar.com/feeds.xml": {
@@ -156,7 +156,7 @@
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
-    "published": 11,
+    "published": 12,
     "skipped": 12
   }
 }
