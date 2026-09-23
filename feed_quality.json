@@ -46,7 +46,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 9,
+    "published": 10,
     "skipped": 7
   },
   "https://gizmodo.com/rss": {
@@ -91,7 +91,7 @@
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
-    "published": 5,
+    "published": 6,
     "skipped": 12
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
