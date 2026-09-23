@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 15,
+    "published": 16,
     "skipped": 3
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 11,
+    "published": 12,
     "skipped": 8
   },
   "https://www.techradar.com/feeds.xml": {
