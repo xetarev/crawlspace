@@ -32,7 +32,7 @@
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
     "published": 9,
-    "skipped": 10
+    "skipped": 11
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
     "name": "VentureBeat",
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 36,
+    "published": 37,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -101,7 +101,7 @@
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
-    "published": 6,
+    "published": 7,
     "skipped": 13
   },
   "https://www.macworld.com/index.rss": {
@@ -127,7 +127,7 @@
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
     "published": 11,
-    "skipped": 5
+    "skipped": 6
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
@@ -142,7 +142,7 @@
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
     "published": 12,
-    "skipped": 8
+    "skipped": 9
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
