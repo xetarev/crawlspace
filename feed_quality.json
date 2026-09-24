@@ -46,7 +46,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 12,
+    "published": 13,
     "skipped": 7
   },
   "https://gizmodo.com/rss": {
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 30,
+    "published": 31,
     "skipped": 8
   },
   "https://the-decoder.com/feed": {
@@ -82,12 +82,12 @@
   "https://www.androidauthority.com/feed": {
     "name": "Android Authority",
     "published": 4,
-    "skipped": 4
+    "skipped": 5
   },
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 6,
-    "skipped": 10
+    "skipped": 11
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
