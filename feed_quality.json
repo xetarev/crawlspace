@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 20,
+    "published": 21,
     "skipped": 3
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -81,7 +81,7 @@
   },
   "https://www.androidauthority.com/feed": {
     "name": "Android Authority",
-    "published": 1,
+    "published": 2,
     "skipped": 3
   },
   "https://www.androidpolice.com/feed": {
