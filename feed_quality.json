@@ -81,7 +81,7 @@
   },
   "https://www.androidauthority.com/feed": {
     "name": "Android Authority",
-    "published": 2,
+    "published": 3,
     "skipped": 3
   },
   "https://www.androidpolice.com/feed": {
@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 14,
+    "published": 15,
     "skipped": 11
   },
   "https://www.wired.com/feed/rss": {
