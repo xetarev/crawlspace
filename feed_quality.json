@@ -26,7 +26,7 @@
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
-    "published": 8,
+    "published": 9,
     "skipped": 14
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 29,
+    "published": 30,
     "skipped": 10
   },
   "https://openai.com/news/rss.xml": {
