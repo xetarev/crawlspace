@@ -66,7 +66,7 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 34,
+    "published": 35,
     "skipped": 8
   },
   "https://techcrunch.com/feed/": {
@@ -92,7 +92,7 @@
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
     "published": 6,
-    "skipped": 15
+    "skipped": 16
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
@@ -131,7 +131,7 @@
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
-    "published": 2,
+    "published": 3,
     "skipped": 8
   },
   "https://www.theverge.com/rss/index.xml": {
