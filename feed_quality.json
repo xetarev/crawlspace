@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 15,
+    "published": 16,
     "skipped": 13
   },
   "https://www.wired.com/feed/rss": {
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 16,
+    "published": 17,
     "skipped": 9
   },
   "https://www.zdnet.com/news/rss.xml": {
