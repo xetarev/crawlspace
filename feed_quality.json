@@ -27,7 +27,7 @@
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
     "published": 7,
-    "skipped": 12
+    "skipped": 13
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
@@ -66,7 +66,7 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 31,
+    "published": 32,
     "skipped": 7
   },
   "https://techcrunch.com/feed/": {
@@ -112,7 +112,7 @@
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
     "published": 13,
-    "skipped": 11
+    "skipped": 12
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 13,
+    "published": 14,
     "skipped": 11
   },
   "https://www.wired.com/feed/rss": {
