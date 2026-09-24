@@ -27,7 +27,7 @@
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
     "published": 9,
-    "skipped": 14
+    "skipped": 15
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 30,
+    "published": 31,
     "skipped": 10
   },
   "https://openai.com/news/rss.xml": {
@@ -146,7 +146,7 @@
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
-    "published": 13,
+    "published": 14,
     "skipped": 11
   },
   "https://www.xda-developers.com/feed": {
