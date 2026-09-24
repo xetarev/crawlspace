@@ -27,7 +27,7 @@
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
     "published": 8,
-    "skipped": 13
+    "skipped": 14
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
@@ -82,7 +82,7 @@
   "https://www.androidauthority.com/feed": {
     "name": "Android Authority",
     "published": 3,
-    "skipped": 3
+    "skipped": 4
   },
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
@@ -132,12 +132,12 @@
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
     "published": 2,
-    "skipped": 7
+    "skipped": 8
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 20,
-    "skipped": 15
+    "skipped": 16
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
@@ -147,7 +147,7 @@
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
     "published": 13,
-    "skipped": 10
+    "skipped": 11
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
