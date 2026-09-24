@@ -67,7 +67,7 @@
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
     "published": 33,
-    "skipped": 7
+    "skipped": 8
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
@@ -87,7 +87,7 @@
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 6,
-    "skipped": 8
+    "skipped": 9
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
@@ -107,7 +107,7 @@
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
     "published": 4,
-    "skipped": 11
+    "skipped": 12
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
@@ -117,12 +117,12 @@
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 5,
-    "skipped": 11
+    "skipped": 12
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
     "published": 0,
-    "skipped": 5
+    "skipped": 6
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
@@ -131,7 +131,7 @@
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
-    "published": 1,
+    "published": 2,
     "skipped": 7
   },
   "https://www.theverge.com/rss/index.xml": {
@@ -142,7 +142,7 @@
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
     "published": 15,
-    "skipped": 11
+    "skipped": 12
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
@@ -152,7 +152,7 @@
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
     "published": 15,
-    "skipped": 8
+    "skipped": 9
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
