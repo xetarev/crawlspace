@@ -66,12 +66,12 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 35,
+    "published": 36,
     "skipped": 8
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 33,
+    "published": 34,
     "skipped": 9
   },
   "https://the-decoder.com/feed": {
@@ -82,7 +82,7 @@
   "https://www.androidauthority.com/feed": {
     "name": "Android Authority",
     "published": 4,
-    "skipped": 5
+    "skipped": 6
   },
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
@@ -127,7 +127,7 @@
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
     "published": 14,
-    "skipped": 9
+    "skipped": 10
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
@@ -137,7 +137,7 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 21,
-    "skipped": 19
+    "skipped": 20
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
@@ -147,7 +147,7 @@
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
     "published": 15,
-    "skipped": 11
+    "skipped": 12
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
