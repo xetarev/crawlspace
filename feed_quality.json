@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 27,
+    "published": 28,
     "skipped": 3
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -116,7 +116,7 @@
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
-    "published": 5,
+    "published": 6,
     "skipped": 13
   },
   "https://www.sammobile.com/feed": {
@@ -137,7 +137,7 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 20,
-    "skipped": 17
+    "skipped": 18
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
