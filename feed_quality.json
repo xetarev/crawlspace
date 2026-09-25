@@ -46,7 +46,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 13,
+    "published": 14,
     "skipped": 7
   },
   "https://gizmodo.com/rss": {
@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 16,
+    "published": 17,
     "skipped": 13
   },
   "https://www.wired.com/feed/rss": {
