@@ -12,7 +12,7 @@
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
     "published": 1,
-    "skipped": 8
+    "skipped": 9
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 26,
+    "published": 27,
     "skipped": 3
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -146,7 +146,7 @@
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
-    "published": 14,
+    "published": 15,
     "skipped": 11
   },
   "https://www.xda-developers.com/feed": {
