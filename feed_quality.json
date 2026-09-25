@@ -116,7 +116,7 @@
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
-    "published": 6,
+    "published": 7,
     "skipped": 13
   },
   "https://www.sammobile.com/feed": {
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 14,
+    "published": 15,
     "skipped": 10
   },
   "https://www.techradar.com/feeds.xml": {
