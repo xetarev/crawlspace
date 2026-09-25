@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 31,
+    "published": 32,
     "skipped": 8
   },
   "https://the-decoder.com/feed": {
@@ -91,7 +91,7 @@
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
-    "published": 6,
+    "published": 7,
     "skipped": 16
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
