@@ -16,7 +16,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 35,
+    "published": 36,
     "skipped": 1
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -46,7 +46,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 14,
+    "published": 15,
     "skipped": 8
   },
   "https://gizmodo.com/rss": {
@@ -72,7 +72,7 @@
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
     "published": 33,
-    "skipped": 8
+    "skipped": 9
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
@@ -137,7 +137,7 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 21,
-    "skipped": 18
+    "skipped": 19
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
