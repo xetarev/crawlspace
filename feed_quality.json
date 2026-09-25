@@ -16,7 +16,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 36,
+    "published": 37,
     "skipped": 1
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -117,7 +117,7 @@
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 7,
-    "skipped": 14
+    "skipped": 15
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 15,
+    "published": 16,
     "skipped": 10
   },
   "https://www.techradar.com/feeds.xml": {
