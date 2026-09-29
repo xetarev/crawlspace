@@ -66,12 +66,12 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 40,
+    "published": 41,
     "skipped": 9
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 36,
+    "published": 37,
     "skipped": 9
   },
   "https://the-decoder.com/feed": {
@@ -92,12 +92,12 @@
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
     "published": 7,
-    "skipped": 17
+    "skipped": 18
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
     "published": 1,
-    "skipped": 5
+    "skipped": 6
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
@@ -107,7 +107,7 @@
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
     "published": 5,
-    "skipped": 14
+    "skipped": 15
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
@@ -127,7 +127,7 @@
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
     "published": 17,
-    "skipped": 10
+    "skipped": 11
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
@@ -142,7 +142,7 @@
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
     "published": 18,
-    "skipped": 14
+    "skipped": 15
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
