@@ -16,7 +16,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 38,
+    "published": 39,
     "skipped": 1
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -66,7 +66,7 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 38,
+    "published": 39,
     "skipped": 9
   },
   "https://techcrunch.com/feed/": {
@@ -117,7 +117,7 @@
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 7,
-    "skipped": 15
+    "skipped": 16
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
