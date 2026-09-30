@@ -31,7 +31,7 @@
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
-    "published": 11,
+    "published": 12,
     "skipped": 12
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
@@ -47,7 +47,7 @@
   "https://futurism.com/feed": {
     "name": "Futurism",
     "published": 15,
-    "skipped": 9
+    "skipped": 10
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 22,
+    "published": 23,
     "skipped": 21
   },
   "https://www.tomshardware.com/feeds.xml": {
