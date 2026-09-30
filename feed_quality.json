@@ -76,7 +76,7 @@
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 25,
+    "published": 26,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 21,
+    "published": 22,
     "skipped": 11
   },
   "https://www.techradar.com/feeds.xml": {
