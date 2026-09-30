@@ -27,7 +27,7 @@
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
     "published": 10,
-    "skipped": 16
+    "skipped": 17
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
@@ -47,7 +47,7 @@
   "https://futurism.com/feed": {
     "name": "Futurism",
     "published": 15,
-    "skipped": 10
+    "skipped": 11
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 18,
+    "published": 19,
     "skipped": 15
   },
   "https://www.wired.com/feed/rss": {
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 19,
+    "published": 20,
     "skipped": 9
   },
   "https://www.zdnet.com/news/rss.xml": {
