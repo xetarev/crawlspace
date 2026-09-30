@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 14,
+    "published": 15,
     "skipped": 12
   },
   "https://www.pcmag.com/feeds/rss/latest": {
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 18,
+    "published": 19,
     "skipped": 11
   },
   "https://www.techradar.com/feeds.xml": {
