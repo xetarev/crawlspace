@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 15,
+    "published": 16,
     "skipped": 15
   },
   "https://www.pcmag.com/feeds/rss/latest": {
@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 25,
+    "published": 26,
     "skipped": 21
   },
   "https://www.tomshardware.com/feeds.xml": {
