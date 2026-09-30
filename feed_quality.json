@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 60,
+    "published": 61,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -92,7 +92,7 @@
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
     "published": 7,
-    "skipped": 20
+    "skipped": 21
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 22,
+    "published": 23,
     "skipped": 11
   },
   "https://www.techradar.com/feeds.xml": {
