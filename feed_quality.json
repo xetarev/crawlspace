@@ -26,7 +26,7 @@
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
-    "published": 12,
+    "published": 13,
     "skipped": 17
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
@@ -42,7 +42,7 @@
   "https://feeds.macrumors.com/MacRumors-All": {
     "name": "MacRumors",
     "published": 1,
-    "skipped": 6
+    "skipped": 7
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 61,
+    "published": 62,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
