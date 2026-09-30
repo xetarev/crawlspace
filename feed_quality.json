@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 24,
+    "published": 25,
     "skipped": 21
   },
   "https://www.tomshardware.com/feeds.xml": {
@@ -156,7 +156,7 @@
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
-    "published": 14,
+    "published": 15,
     "skipped": 13
   }
 }
