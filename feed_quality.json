@@ -101,18 +101,18 @@
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
-    "published": 9,
+    "published": 10,
     "skipped": 16
   },
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
-    "published": 5,
+    "published": 6,
     "skipped": 15
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
     "published": 15,
-    "skipped": 14
+    "skipped": 15
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
