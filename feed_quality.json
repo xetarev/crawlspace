@@ -86,7 +86,7 @@
   },
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
-    "published": 6,
+    "published": 7,
     "skipped": 12
   },
   "https://www.cnet.com/rss/news/": {
@@ -131,7 +131,7 @@
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
-    "published": 3,
+    "published": 4,
     "skipped": 8
   },
   "https://www.theverge.com/rss/index.xml": {
