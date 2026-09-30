@@ -26,7 +26,7 @@
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
-    "published": 10,
+    "published": 11,
     "skipped": 17
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
@@ -92,7 +92,7 @@
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
     "published": 7,
-    "skipped": 19
+    "skipped": 20
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
@@ -112,7 +112,7 @@
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
     "published": 15,
-    "skipped": 13
+    "skipped": 14
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 23,
+    "published": 24,
     "skipped": 21
   },
   "https://www.tomshardware.com/feeds.xml": {
@@ -147,12 +147,12 @@
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
     "published": 16,
-    "skipped": 12
+    "skipped": 13
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
     "published": 20,
-    "skipped": 9
+    "skipped": 10
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
