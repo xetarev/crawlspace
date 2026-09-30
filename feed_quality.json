@@ -76,7 +76,7 @@
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 26,
+    "published": 27,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -97,7 +97,7 @@
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
     "published": 1,
-    "skipped": 6
+    "skipped": 7
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
@@ -107,7 +107,7 @@
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
     "published": 6,
-    "skipped": 15
+    "skipped": 16
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
@@ -156,7 +156,7 @@
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
-    "published": 15,
+    "published": 16,
     "skipped": 13
   }
 }
