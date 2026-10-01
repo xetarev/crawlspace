@@ -7,7 +7,7 @@
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
     "published": 9,
-    "skipped": 11
+    "skipped": 12
   },
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 39,
+    "published": 40,
     "skipped": 9
   },
   "https://the-decoder.com/feed": {
@@ -112,12 +112,12 @@
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
     "published": 16,
-    "skipped": 16
+    "skipped": 17
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 8,
-    "skipped": 19
+    "skipped": 20
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 23,
+    "published": 24,
     "skipped": 11
   },
   "https://www.techradar.com/feeds.xml": {
@@ -137,7 +137,7 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 27,
-    "skipped": 24
+    "skipped": 25
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
