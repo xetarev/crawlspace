@@ -1,7 +1,7 @@
 {
   "https://9to5google.com/feed": {
     "name": "9to5Google",
-    "published": 2,
+    "published": 3,
     "skipped": 7
   },
   "https://9to5mac.com/feed": {
@@ -101,7 +101,7 @@
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
-    "published": 10,
+    "published": 11,
     "skipped": 17
   },
   "https://www.macworld.com/index.rss": {
@@ -147,7 +147,7 @@
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
     "published": 18,
-    "skipped": 14
+    "skipped": 15
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
