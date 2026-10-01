@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 69,
+    "published": 70,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 41,
+    "published": 42,
     "skipped": 9
   },
   "https://the-decoder.com/feed": {
