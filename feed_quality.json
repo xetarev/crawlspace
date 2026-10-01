@@ -76,7 +76,7 @@
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 27,
+    "published": 28,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -87,11 +87,11 @@
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 7,
-    "skipped": 14
+    "skipped": 15
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
-    "published": 8,
+    "published": 9,
     "skipped": 22
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
@@ -137,7 +137,7 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 27,
-    "skipped": 23
+    "skipped": 24
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
