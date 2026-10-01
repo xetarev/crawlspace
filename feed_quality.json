@@ -16,7 +16,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 39,
+    "published": 40,
     "skipped": 2
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 63,
+    "published": 64,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
