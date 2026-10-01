@@ -46,7 +46,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 15,
+    "published": 16,
     "skipped": 11
   },
   "https://gizmodo.com/rss": {
@@ -156,7 +156,7 @@
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
-    "published": 17,
+    "published": 18,
     "skipped": 13
   }
 }
