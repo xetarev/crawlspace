@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 67,
+    "published": 68,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 24,
+    "published": 25,
     "skipped": 11
   },
   "https://www.techradar.com/feeds.xml": {
