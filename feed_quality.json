@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 46,
+    "published": 47,
     "skipped": 9
   },
   "https://the-decoder.com/feed": {
@@ -91,13 +91,13 @@
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
-    "published": 11,
+    "published": 12,
     "skipped": 22
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
     "published": 1,
-    "skipped": 8
+    "skipped": 9
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
@@ -137,7 +137,7 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 29,
-    "skipped": 28
+    "skipped": 29
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
