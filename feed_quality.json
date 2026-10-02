@@ -26,7 +26,7 @@
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
-    "published": 14,
+    "published": 15,
     "skipped": 23
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
@@ -76,7 +76,7 @@
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 32,
+    "published": 33,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -97,7 +97,7 @@
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
     "published": 1,
-    "skipped": 7
+    "skipped": 8
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
@@ -117,7 +117,7 @@
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 8,
-    "skipped": 20
+    "skipped": 21
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
