@@ -146,12 +146,12 @@
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
-    "published": 19,
+    "published": 20,
     "skipped": 17
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 21,
+    "published": 22,
     "skipped": 12
   },
   "https://www.zdnet.com/news/rss.xml": {
