@@ -12,7 +12,7 @@
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
     "published": 1,
-    "skipped": 10
+    "skipped": 11
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 17,
+    "published": 18,
     "skipped": 18
   },
   "https://www.pcmag.com/feeds/rss/latest": {
@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 29,
+    "published": 30,
     "skipped": 29
   },
   "https://www.tomshardware.com/feeds.xml": {
@@ -157,6 +157,6 @@
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
     "published": 19,
-    "skipped": 17
+    "skipped": 18
   }
 }
