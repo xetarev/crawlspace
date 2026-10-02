@@ -22,7 +22,7 @@
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
     "published": 39,
-    "skipped": 3
+    "skipped": 4
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 75,
+    "published": 76,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 25,
+    "published": 26,
     "skipped": 13
   },
   "https://www.techradar.com/feeds.xml": {
