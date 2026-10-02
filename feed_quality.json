@@ -7,7 +7,7 @@
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
     "published": 9,
-    "skipped": 12
+    "skipped": 13
   },
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 71,
+    "published": 72,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 20,
+    "published": 21,
     "skipped": 15
   },
   "https://www.wired.com/feed/rss": {
