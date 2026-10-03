@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 44,
+    "published": 45,
     "skipped": 4
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 49,
+    "published": 50,
     "skipped": 11
   },
   "https://the-decoder.com/feed": {
