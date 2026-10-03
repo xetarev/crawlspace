@@ -86,7 +86,7 @@
   },
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
-    "published": 7,
+    "published": 8,
     "skipped": 16
   },
   "https://www.cnet.com/rss/news/": {
@@ -137,7 +137,7 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 31,
-    "skipped": 30
+    "skipped": 31
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 24,
+    "published": 25,
     "skipped": 12
   },
   "https://www.zdnet.com/news/rss.xml": {
