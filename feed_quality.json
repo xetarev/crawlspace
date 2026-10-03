@@ -22,7 +22,7 @@
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
     "published": 45,
-    "skipped": 4
+    "skipped": 5
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
@@ -62,11 +62,11 @@
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
     "published": 43,
-    "skipped": 17
+    "skipped": 18
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 47,
+    "published": 48,
     "skipped": 12
   },
   "https://techcrunch.com/feed/": {
@@ -156,7 +156,7 @@
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
-    "published": 20,
+    "published": 21,
     "skipped": 20
   }
 }
