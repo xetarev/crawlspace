@@ -46,7 +46,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 16,
+    "published": 17,
     "skipped": 13
   },
   "https://gizmodo.com/rss": {
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 82,
+    "published": 83,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
