@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 48,
+    "published": 49,
     "skipped": 10
   },
   "https://the-decoder.com/feed": {
@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 19,
+    "published": 20,
     "skipped": 18
   },
   "https://www.pcmag.com/feeds/rss/latest": {
@@ -147,7 +147,7 @@
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
     "published": 20,
-    "skipped": 18
+    "skipped": 19
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
