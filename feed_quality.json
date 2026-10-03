@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 41,
+    "published": 42,
     "skipped": 4
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -47,7 +47,7 @@
   "https://futurism.com/feed": {
     "name": "Futurism",
     "published": 17,
-    "skipped": 13
+    "skipped": 14
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -156,7 +156,7 @@
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
-    "published": 19,
+    "published": 20,
     "skipped": 18
   }
 }
