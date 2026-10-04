@@ -1,7 +1,7 @@
 {
   "https://9to5google.com/feed": {
     "name": "9to5Google",
-    "published": 5,
+    "published": 6,
     "skipped": 9
   },
   "https://9to5mac.com/feed": {
@@ -22,7 +22,7 @@
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
     "published": 46,
-    "skipped": 6
+    "skipped": 7
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
@@ -47,7 +47,7 @@
   "https://futurism.com/feed": {
     "name": "Futurism",
     "published": 17,
-    "skipped": 16
+    "skipped": 17
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 46,
+    "published": 47,
     "skipped": 18
   },
   "https://openai.com/news/rss.xml": {
@@ -147,7 +147,7 @@
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
     "published": 20,
-    "skipped": 21
+    "skipped": 22
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
