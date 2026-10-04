@@ -66,12 +66,12 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 48,
+    "published": 49,
     "skipped": 12
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 51,
+    "published": 52,
     "skipped": 11
   },
   "https://the-decoder.com/feed": {
@@ -87,7 +87,7 @@
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 8,
-    "skipped": 17
+    "skipped": 18
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
