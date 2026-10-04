@@ -6,7 +6,7 @@
   },
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
-    "published": 11,
+    "published": 12,
     "skipped": 14
   },
   "https://appleinsider.com/rss/news": {
@@ -26,7 +26,7 @@
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
-    "published": 17,
+    "published": 18,
     "skipped": 26
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
@@ -47,7 +47,7 @@
   "https://futurism.com/feed": {
     "name": "Futurism",
     "published": 17,
-    "skipped": 15
+    "skipped": 16
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -102,7 +102,7 @@
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
     "published": 13,
-    "skipped": 21
+    "skipped": 22
   },
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
