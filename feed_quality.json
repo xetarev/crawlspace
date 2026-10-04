@@ -26,7 +26,7 @@
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
-    "published": 19,
+    "published": 20,
     "skipped": 27
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 27,
+    "published": 28,
     "skipped": 13
   },
   "https://www.zdnet.com/news/rss.xml": {
