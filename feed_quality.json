@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 50,
+    "published": 51,
     "skipped": 11
   },
   "https://the-decoder.com/feed": {
@@ -81,7 +81,7 @@
   },
   "https://www.androidauthority.com/feed": {
     "name": "Android Authority",
-    "published": 5,
+    "published": 6,
     "skipped": 10
   },
   "https://www.androidpolice.com/feed": {
