@@ -7,7 +7,7 @@
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
     "published": 12,
-    "skipped": 15
+    "skipped": 16
   },
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 55,
+    "published": 56,
     "skipped": 11
   },
   "https://the-decoder.com/feed": {
@@ -111,13 +111,13 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 21,
+    "published": 22,
     "skipped": 19
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 8,
-    "skipped": 27
+    "skipped": 28
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
