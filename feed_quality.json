@@ -47,7 +47,7 @@
   "https://futurism.com/feed": {
     "name": "Futurism",
     "published": 17,
-    "skipped": 14
+    "skipped": 15
   },
   "https://gizmodo.com/rss": {
     "name": "Gizmodo",
@@ -151,12 +151,12 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 25,
+    "published": 26,
     "skipped": 12
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
-    "published": 21,
+    "published": 22,
     "skipped": 20
   }
 }
