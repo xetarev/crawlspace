@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 52,
+    "published": 53,
     "skipped": 7
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -112,7 +112,7 @@
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
     "published": 22,
-    "skipped": 19
+    "skipped": 20
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 29,
+    "published": 30,
     "skipped": 13
   },
   "https://www.techradar.com/feeds.xml": {
