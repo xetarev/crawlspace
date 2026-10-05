@@ -111,7 +111,7 @@
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
-    "published": 22,
+    "published": 23,
     "skipped": 20
   },
   "https://www.pcmag.com/feeds/rss/latest": {
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 30,
+    "published": 31,
     "skipped": 13
   },
   "https://www.zdnet.com/news/rss.xml": {
