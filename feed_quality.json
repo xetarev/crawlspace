@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 51,
+    "published": 52,
     "skipped": 7
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -62,7 +62,7 @@
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
     "published": 49,
-    "skipped": 21
+    "skipped": 22
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
@@ -146,7 +146,7 @@
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
-    "published": 20,
+    "published": 21,
     "skipped": 24
   },
   "https://www.xda-developers.com/feed": {
