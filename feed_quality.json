@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 49,
+    "published": 50,
     "skipped": 23
   },
   "https://openai.com/news/rss.xml": {
@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 32,
+    "published": 33,
     "skipped": 32
   },
   "https://www.tomshardware.com/feeds.xml": {
