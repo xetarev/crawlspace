@@ -42,11 +42,11 @@
   "https://feeds.macrumors.com/MacRumors-All": {
     "name": "MacRumors",
     "published": 1,
-    "skipped": 10
+    "skipped": 11
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 19,
+    "published": 20,
     "skipped": 17
   },
   "https://gizmodo.com/rss": {
@@ -131,7 +131,7 @@
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
-    "published": 8,
+    "published": 9,
     "skipped": 11
   },
   "https://www.theverge.com/rss/index.xml": {
