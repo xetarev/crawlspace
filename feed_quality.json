@@ -46,7 +46,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 20,
+    "published": 21,
     "skipped": 18
   },
   "https://gizmodo.com/rss": {
@@ -92,7 +92,7 @@
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
     "published": 12,
-    "skipped": 29
+    "skipped": 30
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
@@ -136,7 +136,7 @@
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
-    "published": 31,
+    "published": 32,
     "skipped": 32
   },
   "https://www.tomshardware.com/feeds.xml": {
