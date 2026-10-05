@@ -81,7 +81,7 @@
   },
   "https://www.androidauthority.com/feed": {
     "name": "Android Authority",
-    "published": 7,
+    "published": 8,
     "skipped": 12
   },
   "https://www.androidpolice.com/feed": {
@@ -106,7 +106,7 @@
   },
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
-    "published": 9,
+    "published": 10,
     "skipped": 21
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
@@ -117,7 +117,7 @@
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 8,
-    "skipped": 28
+    "skipped": 29
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
