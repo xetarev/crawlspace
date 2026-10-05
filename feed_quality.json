@@ -126,12 +126,12 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 30,
+    "published": 31,
     "skipped": 13
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
-    "published": 9,
+    "published": 10,
     "skipped": 11
   },
   "https://www.theverge.com/rss/index.xml": {
