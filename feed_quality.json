@@ -16,7 +16,7 @@
   },
   "https://deepmind.google/blog/feed": {
     "name": "Google DeepMind",
-    "published": 55,
+    "published": 56,
     "skipped": 2
   },
   "https://developer.nvidia.com/blog//feed": {
@@ -42,7 +42,7 @@
   "https://feeds.macrumors.com/MacRumors-All": {
     "name": "MacRumors",
     "published": 1,
-    "skipped": 12
+    "skipped": 13
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 56,
+    "published": 57,
     "skipped": 14
   },
   "https://the-decoder.com/feed": {
