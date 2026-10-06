@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 56,
+    "published": 57,
     "skipped": 7
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -91,7 +91,7 @@
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
-    "published": 13,
+    "published": 14,
     "skipped": 30
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
@@ -142,7 +142,7 @@
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
     "published": 25,
-    "skipped": 20
+    "skipped": 21
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
