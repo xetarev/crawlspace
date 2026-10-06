@@ -121,7 +121,7 @@
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
-    "published": 0,
+    "published": 1,
     "skipped": 8
   },
   "https://www.technologyreview.com/feed": {
@@ -142,7 +142,7 @@
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
     "published": 25,
-    "skipped": 21
+    "skipped": 22
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
@@ -156,7 +156,7 @@
   },
   "https://www.zdnet.com/news/rss.xml": {
     "name": "ZDNET",
-    "published": 23,
+    "published": 24,
     "skipped": 20
   }
 }
