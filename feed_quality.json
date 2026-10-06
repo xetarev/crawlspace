@@ -21,13 +21,13 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 58,
+    "published": 59,
     "skipped": 7
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
     "published": 21,
-    "skipped": 29
+    "skipped": 30
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
@@ -76,7 +76,7 @@
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 41,
+    "published": 42,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -87,7 +87,7 @@
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 9,
-    "skipped": 21
+    "skipped": 22
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
