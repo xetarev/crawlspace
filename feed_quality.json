@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 58,
+    "published": 59,
     "skipped": 14
   },
   "https://the-decoder.com/feed": {
@@ -117,7 +117,7 @@
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 8,
-    "skipped": 31
+    "skipped": 32
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
@@ -141,7 +141,7 @@
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
-    "published": 25,
+    "published": 26,
     "skipped": 22
   },
   "https://www.wired.com/feed/rss": {
