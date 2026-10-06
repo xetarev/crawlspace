@@ -6,7 +6,7 @@
   },
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
-    "published": 12,
+    "published": 13,
     "skipped": 17
   },
   "https://appleinsider.com/rss/news": {
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 100,
+    "published": 101,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
