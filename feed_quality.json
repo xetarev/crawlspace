@@ -46,7 +46,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 21,
+    "published": 22,
     "skipped": 18
   },
   "https://gizmodo.com/rss": {
@@ -101,7 +101,7 @@
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
-    "published": 15,
+    "published": 16,
     "skipped": 26
   },
   "https://www.macworld.com/index.rss": {
