@@ -31,7 +31,7 @@
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
-    "published": 14,
+    "published": 15,
     "skipped": 18
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
@@ -87,7 +87,7 @@
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 9,
-    "skipped": 20
+    "skipped": 21
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 32,
+    "published": 33,
     "skipped": 13
   },
   "https://www.techradar.com/feeds.xml": {
