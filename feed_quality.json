@@ -66,12 +66,12 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 55,
+    "published": 56,
     "skipped": 14
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 57,
+    "published": 58,
     "skipped": 14
   },
   "https://the-decoder.com/feed": {
@@ -147,7 +147,7 @@
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
     "published": 21,
-    "skipped": 28
+    "skipped": 29
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
