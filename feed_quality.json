@@ -76,7 +76,7 @@
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 39,
+    "published": 40,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -117,7 +117,7 @@
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 8,
-    "skipped": 30
+    "skipped": 31
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 34,
+    "published": 35,
     "skipped": 13
   },
   "https://www.zdnet.com/news/rss.xml": {
