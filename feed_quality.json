@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 53,
+    "published": 54,
     "skipped": 24
   },
   "https://openai.com/news/rss.xml": {
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 33,
+    "published": 34,
     "skipped": 16
   },
   "https://www.techradar.com/feeds.xml": {
