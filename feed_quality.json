@@ -27,11 +27,11 @@
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
     "published": 22,
-    "skipped": 31
+    "skipped": 32
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
-    "published": 16,
+    "published": 17,
     "skipped": 19
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
@@ -107,7 +107,7 @@
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
     "published": 10,
-    "skipped": 21
+    "skipped": 22
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
@@ -131,7 +131,7 @@
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
-    "published": 10,
+    "published": 11,
     "skipped": 12
   },
   "https://www.theverge.com/rss/index.xml": {
