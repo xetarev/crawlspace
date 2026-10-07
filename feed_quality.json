@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 60,
+    "published": 61,
     "skipped": 15
   },
   "https://the-decoder.com/feed": {
@@ -92,7 +92,7 @@
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
     "published": 14,
-    "skipped": 33
+    "skipped": 34
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
@@ -107,7 +107,7 @@
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
     "published": 10,
-    "skipped": 22
+    "skipped": 23
   },
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
@@ -132,7 +132,7 @@
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
     "published": 11,
-    "skipped": 13
+    "skipped": 14
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 39,
+    "published": 40,
     "skipped": 13
   },
   "https://www.zdnet.com/news/rss.xml": {
