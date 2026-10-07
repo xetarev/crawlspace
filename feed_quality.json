@@ -46,7 +46,7 @@
   },
   "https://futurism.com/feed": {
     "name": "Futurism",
-    "published": 22,
+    "published": 23,
     "skipped": 18
   },
   "https://gizmodo.com/rss": {
@@ -66,7 +66,7 @@
   },
   "https://openai.com/news/rss.xml": {
     "name": "OpenAI News",
-    "published": 61,
+    "published": 62,
     "skipped": 14
   },
   "https://techcrunch.com/feed/": {
@@ -92,7 +92,7 @@
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
     "published": 14,
-    "skipped": 30
+    "skipped": 31
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
@@ -112,7 +112,7 @@
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
     "published": 25,
-    "skipped": 23
+    "skipped": 24
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
