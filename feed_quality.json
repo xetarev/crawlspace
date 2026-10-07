@@ -21,13 +21,13 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 61,
+    "published": 62,
     "skipped": 7
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
     "published": 22,
-    "skipped": 32
+    "skipped": 33
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
@@ -97,7 +97,7 @@
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
     "published": 1,
-    "skipped": 12
+    "skipped": 13
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
@@ -126,13 +126,13 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 34,
+    "published": 35,
     "skipped": 17
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
     "published": 11,
-    "skipped": 12
+    "skipped": 13
   },
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
