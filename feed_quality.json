@@ -11,7 +11,7 @@
   },
   "https://appleinsider.com/rss/news": {
     "name": "AppleInsider",
-    "published": 2,
+    "published": 3,
     "skipped": 14
   },
   "https://deepmind.google/blog/feed": {
@@ -56,7 +56,7 @@
   },
   "https://huggingface.co/blog/feed.xml": {
     "name": "Hugging Face",
-    "published": 108,
+    "published": 109,
     "skipped": 0
   },
   "https://news.ycombinator.com/rss": {
@@ -92,7 +92,7 @@
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
     "published": 14,
-    "skipped": 31
+    "skipped": 32
   },
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
@@ -102,7 +102,7 @@
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
     "published": 16,
-    "skipped": 26
+    "skipped": 27
   },
   "https://www.macworld.com/index.rss": {
     "name": "Macworld",
@@ -117,7 +117,7 @@
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
     "published": 9,
-    "skipped": 32
+    "skipped": 33
   },
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
