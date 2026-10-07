@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 62,
+    "published": 63,
     "skipped": 7
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -76,7 +76,7 @@
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
-    "published": 45,
+    "published": 46,
     "skipped": 0
   },
   "https://www.androidauthority.com/feed": {
@@ -122,12 +122,12 @@
   "https://www.sammobile.com/feed": {
     "name": "SamMobile",
     "published": 1,
-    "skipped": 8
+    "skipped": 9
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
     "published": 35,
-    "skipped": 17
+    "skipped": 18
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
