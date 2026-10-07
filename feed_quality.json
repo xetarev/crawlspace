@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 54,
+    "published": 55,
     "skipped": 24
   },
   "https://openai.com/news/rss.xml": {
@@ -97,7 +97,7 @@
   "https://www.gsmarena.com/rss-news-reviews.php3": {
     "name": "GSMArena",
     "published": 1,
-    "skipped": 11
+    "skipped": 12
   },
   "https://www.howtogeek.com/feed/": {
     "name": "How-To Geek",
@@ -112,11 +112,11 @@
   "https://www.makeuseof.com/feed/category/technology-explained/": {
     "name": "MakeUseOf",
     "published": 25,
-    "skipped": 21
+    "skipped": 22
   },
   "https://www.pcmag.com/feeds/rss/latest": {
     "name": "PCMag",
-    "published": 8,
+    "published": 9,
     "skipped": 32
   },
   "https://www.sammobile.com/feed": {
@@ -142,7 +142,7 @@
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
     "published": 26,
-    "skipped": 22
+    "skipped": 23
   },
   "https://www.wired.com/feed/rss": {
     "name": "WIRED",
