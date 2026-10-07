@@ -26,7 +26,7 @@
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
     "name": "Ars Technica",
-    "published": 21,
+    "published": 22,
     "skipped": 31
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
@@ -72,7 +72,7 @@
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
     "published": 59,
-    "skipped": 14
+    "skipped": 15
   },
   "https://the-decoder.com/feed": {
     "name": "The Decoder",
@@ -151,7 +151,7 @@
   },
   "https://www.xda-developers.com/feed": {
     "name": "XDA",
-    "published": 37,
+    "published": 38,
     "skipped": 13
   },
   "https://www.zdnet.com/news/rss.xml": {
