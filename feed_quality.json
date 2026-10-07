@@ -2,7 +2,7 @@
   "https://9to5google.com/feed": {
     "name": "9to5Google",
     "published": 6,
-    "skipped": 15
+    "skipped": 16
   },
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
@@ -31,7 +31,7 @@
   },
   "https://feeds.feedburner.com/IeeeSpectrum": {
     "name": "IEEE Spectrum",
-    "published": 18,
+    "published": 19,
     "skipped": 19
   },
   "https://feeds.feedburner.com/venturebeat/SZYF": {
@@ -87,7 +87,7 @@
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
     "published": 10,
-    "skipped": 23
+    "skipped": 24
   },
   "https://www.cnet.com/rss/news/": {
     "name": "CNET",
@@ -126,7 +126,7 @@
   },
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
-    "published": 35,
+    "published": 36,
     "skipped": 18
   },
   "https://www.techradar.com/feeds.xml": {
@@ -137,7 +137,7 @@
   "https://www.theverge.com/rss/index.xml": {
     "name": "The Verge",
     "published": 35,
-    "skipped": 36
+    "skipped": 37
   },
   "https://www.tomshardware.com/feeds.xml": {
     "name": "Tom's Hardware",
