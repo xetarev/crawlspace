@@ -21,7 +21,7 @@
   },
   "https://developer.nvidia.com/blog//feed": {
     "name": "NVIDIA Developer",
-    "published": 60,
+    "published": 61,
     "skipped": 7
   },
   "https://feeds.arstechnica.com/arstechnica/index": {
@@ -86,7 +86,7 @@
   },
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
-    "published": 9,
+    "published": 10,
     "skipped": 23
   },
   "https://www.cnet.com/rss/news/": {
@@ -127,7 +127,7 @@
   "https://www.technologyreview.com/feed": {
     "name": "MIT Technology Review",
     "published": 34,
-    "skipped": 16
+    "skipped": 17
   },
   "https://www.techradar.com/feeds.xml": {
     "name": "TechRadar",
