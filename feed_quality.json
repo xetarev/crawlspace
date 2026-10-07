@@ -2,7 +2,7 @@
   "https://9to5google.com/feed": {
     "name": "9to5Google",
     "published": 6,
-    "skipped": 13
+    "skipped": 14
   },
   "https://9to5mac.com/feed": {
     "name": "9to5Mac",
@@ -61,7 +61,7 @@
   },
   "https://news.ycombinator.com/rss": {
     "name": "Y Combinator Hacker News",
-    "published": 55,
+    "published": 56,
     "skipped": 24
   },
   "https://openai.com/news/rss.xml": {
@@ -71,7 +71,7 @@
   },
   "https://techcrunch.com/feed/": {
     "name": "TechCrunch",
-    "published": 59,
+    "published": 60,
     "skipped": 15
   },
   "https://the-decoder.com/feed": {
@@ -82,7 +82,7 @@
   "https://www.androidauthority.com/feed": {
     "name": "Android Authority",
     "published": 8,
-    "skipped": 12
+    "skipped": 13
   },
   "https://www.androidpolice.com/feed": {
     "name": "Android Police",
